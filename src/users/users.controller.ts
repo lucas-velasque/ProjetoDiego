@@ -3,7 +3,7 @@ import { Public } from 'src/common/decorators/public.decorator';
 
 @Controller('users')
 export class UsersController {
-  @Public() // 👈 Rota pública
+  @Public() 
   @Get()
   findAll() {
     return ['user1', 'user2'];
