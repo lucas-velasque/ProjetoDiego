@@ -1,0 +1,64 @@
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  ForeignKey,
+  BelongsTo,
+  CreatedAt,
+} from 'sequelize-typescript';
+import { AnuncioVenda } from './anuncioVenda.entity';
+
+@Table({
+  tableName: 'anuncios_venda_cartas',
+  timestamps: true,
+  updatedAt: false,
+})
+export class AnuncioVendaCarta extends Model {
+  @Column({
+    type: DataType.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  })
+  declare id: number;
+
+  @ForeignKey(() => AnuncioVenda)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+  })
+  declare anuncio_venda_id: number;
+
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+  })
+  declare carta_id: number;
+
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+    defaultValue: 1,
+  })
+  declare quantidade: number;
+
+  @Column({
+    type: DataType.ENUM('Mint', 'Near Mint', 'Excellent', 'Good', 'Light Played', 'Played', 'Poor'),
+    allowNull: false,
+    defaultValue: 'Near Mint',
+  })
+  declare condicao: string;
+
+  @Column({
+    type: DataType.TEXT,
+    allowNull: true,
+  })
+  declare observacoes: string;
+
+  @CreatedAt
+  declare created_at: Date;
+
+  // Relacionamento
+  @BelongsTo(() => AnuncioVenda)
+  declare anuncio: AnuncioVenda;
+}
