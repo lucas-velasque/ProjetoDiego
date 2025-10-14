@@ -8,6 +8,7 @@ import { CartasModule } from './cartas/cartas.module';
 import { ComentariosModule } from './comentarios/comentarios.module';
 import { AnunciosVendaModule } from './anunciosVenda/anuncioVenda.module';
 import { databaseConfig } from './database/database.config';
+import { AnunciosCompraModule } from './anunciosCompra/anuncioCompra.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { databaseConfig } from './database/database.config';
     CartasModule,
     ComentariosModule,
     AnunciosVendaModule,
+    AnunciosCompraModule,
   ],
   controllers: [AppController],
   providers: [AppService],
