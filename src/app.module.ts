@@ -9,6 +9,7 @@ import { ComentariosModule } from './comentarios/comentarios.module';
 import { AnunciosVendaModule } from './anunciosVenda/anuncioVenda.module';
 import { databaseConfig } from './database/database.config';
 import { AnunciosCompraModule } from './anunciosCompra/anuncioCompra.module';
+import { PropostasModule } from './propostas/propostas.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { AnunciosCompraModule } from './anunciosCompra/anuncioCompra.module';
     ComentariosModule,
     AnunciosVendaModule,
     AnunciosCompraModule,
+    PropostasModule,
   ],
   controllers: [AppController],
   providers: [AppService],
