@@ -1,17 +1,24 @@
-import { Module } from '@nestjs/common';
-import { SequelizeModule } from '@nestjs/sequelize';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
-import { CartasModule } from './cartas/cartas.module';
-import { ComentariosModule } from './comentarios/comentarios.module';
-import { AnunciosVendaModule } from './anunciosVenda/anuncioVenda.module';
-import { databaseConfig } from './database/database.config';
-import { AnunciosCompraModule } from './anunciosCompra/anuncioCompra.module';
+import { Module } from "@nestjs/common";
+import { SequelizeModule } from "@nestjs/sequelize";
+import { AppController } from "./app.controller";
+import { AppService } from "./app.service";
+import { AuthModule } from "./auth/auth.module";
+import { UsersModule } from "./users/users.module";
+import { CartasModule } from "./cartas/cartas.module";
+import { ComentariosModule } from "./comentarios/comentarios.module";
+import { AnunciosVendaModule } from "./anunciosVenda/anuncioVenda.module";
+import { databaseConfig } from "./database/database.config";
+import { AnunciosCompraModule } from "./anunciosCompra/anuncioCompra.module";
+import { NivelUsuarioModule } from "./nivel-usuario/nivelUsuario.module";
+import { CategoriaLeilaoModule } from "./categoria-leilao/categoriaLeilao.module";
+import { CategoriaCartasModule } from "./categoria-cartas/categoriaCartas.module";
+import { NivelUsuarioService } from "./nivel-usuario/nivelUsuario.service";
+import { CategoriaCartasService } from "./categoria-cartas/categoriaCartas.service";
+import { ConfigModule } from "@nestjs/config";
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     SequelizeModule.forRoot(databaseConfig),
     AuthModule,
     UsersModule,
@@ -19,6 +26,9 @@ import { AnunciosCompraModule } from './anunciosCompra/anuncioCompra.module';
     ComentariosModule,
     AnunciosVendaModule,
     AnunciosCompraModule,
+    NivelUsuarioModule,
+    CategoriaCartasModule,
+    CategoriaLeilaoModule,
   ],
   controllers: [AppController],
   providers: [AppService],
