@@ -4,14 +4,14 @@ import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from 'sequelize
 @Table({ tableName: 'users' })
 export class User extends Model<User> {
   @Column({ primaryKey: true, autoIncrement: true })
-  id: number;
+  declare id: number;
 }
 
 // Placeholder para o modelo Product (assumindo que existe no projeto principal)
 @Table({ tableName: 'products' })
 export class Product extends Model<Product> {
   @Column({ primaryKey: true, autoIncrement: true })
-  id: number;
+  declare id: number;
 }
 
 @Table({
@@ -24,7 +24,7 @@ export class Comentario extends Model<Comentario> {
     autoIncrement: true,
     primaryKey: true,
   })
-  id: number;
+  declare id: number;
 
   @Column({
     type: DataType.TEXT,
@@ -67,13 +67,13 @@ export class Comentario extends Model<Comentario> {
     allowNull: false,
     defaultValue: DataType.NOW,
   })
-  createdAt: Date;
+  declare createdAt: Date;
 
   @Column({
     type: DataType.DATE,
     allowNull: false,
     defaultValue: DataType.NOW,
   })
-  updatedAt: Date;
+  declare updatedAt: Date;
 }
 
