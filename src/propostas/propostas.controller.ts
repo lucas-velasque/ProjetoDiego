@@ -3,6 +3,8 @@ import { PropostasService } from './propostas.service';
 import { CreatePropostaDto } from './dto/createProposta.dto';
 import { UpdatePropostaDto } from './dto/updateProposta.dto';
 import { Public } from '../common/decorators/public.decorator';
+import { FiltroPropostaDto } from './dto/filtroPropostas.dto';
+import { Query } from '@nestjs/common';
 
 @Controller()
 export class PropostasController {
@@ -19,14 +21,15 @@ export class PropostasController {
     return this.service.criar(dto, tipo, +anuncioId, usuarioId);
   }
 
-  @Public()
-  @Get('anuncios/:tipo/:id/propostas')
-  listarPorAnuncio(
-    @Param('tipo') tipo: string,
-    @Param('id') anuncioId: string,
-  ) {
-    return this.service.listarPorAnuncio(tipo, +anuncioId);
-  }
+@Public()
+@Get('anuncios/:tipo/:id/propostas')
+listarPorAnuncio(
+  @Param('tipo') tipo: string,
+  @Param('id') anuncioId: string,
+  @Query() filtros: FiltroPropostaDto,
+) {
+  return this.service.listarPorAnuncio(tipo, +anuncioId, filtros);
+}
 
   @Public()
   @Get('propostas/:id')

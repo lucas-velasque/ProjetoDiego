@@ -3,6 +3,8 @@ import { AnunciosVendaService } from './anuncioVenda.service';
 import { CreateAnuncioVendaDto } from './dto/createAnuncioVenda.dto';
 import { UpdateAnuncioVendaDto } from './dto/updateAnuncioVenda.dto';
 import { Public } from '../common/decorators/public.decorator'; //tornar rotas públicas para testar com o thunderclient/insomnia/postman
+import { FiltroAnuncioVendaDto } from './dto/filtroAnuncioVenda.dto';
+import { Query } from '@nestjs/common';
 
 @Controller('anuncios-venda')
 export class AnunciosVendaController {
@@ -15,11 +17,11 @@ export class AnunciosVendaController {
     return this.service.criar(dto, usuarioId);
   }
 
-  @Public() //tornar rota pública para testar com o thunderclient/insomnia/postman
-  @Get()
-  listarTodos() {
-    return this.service.listarTodos();
-  }
+ @Public()
+@Get()
+listarTodos(@Query() filtros: FiltroAnuncioVendaDto) {
+  return this.service.listarTodos(filtros);
+}
 
   @Public() //tornar rota pública para testar com o thunderclient/insomnia/postman
   @Get(':id')

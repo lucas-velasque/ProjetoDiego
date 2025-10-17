@@ -8,6 +8,7 @@ import {
   CreatedAt,
 } from 'sequelize-typescript';
 import { AnuncioVenda } from './anuncioVenda.entity';
+import { Carta } from 'src/cartas/entities/carta.entity';
 
 @Table({
   tableName: 'anuncios_venda_cartas',
@@ -59,6 +60,15 @@ export class AnuncioVendaCarta extends Model {
   declare created_at: Date;
 
   // Relacionamento
-  @BelongsTo(() => AnuncioVenda)
+  @BelongsTo(() => AnuncioVenda, {
+    foreignKey: 'anuncio_venda_id',
+    as: 'anuncio',
+  })
   declare anuncio: AnuncioVenda;
+
+  @BelongsTo(() => Carta, {
+    foreignKey: 'carta_id',
+    as: 'carta',
+  })
+  declare carta: Carta;
 }

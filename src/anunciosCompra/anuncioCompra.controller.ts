@@ -3,6 +3,8 @@ import { AnunciosCompraService } from './anuncioCompra.service';
 import { CreateAnuncioCompraDto } from './dto/createAnuncioCompra.dto';
 import { UpdateAnuncioCompraDto } from './dto/updateAnuncioCompra.dto';
 import { Public } from '../common/decorators/public.decorator';
+import { FiltroAnuncioCompraDto } from './dto/filtroAnuncioCompra.dto';
+import { Query } from '@nestjs/common';
 
 @Controller('anuncios-compra')
 export class AnunciosCompraController {
@@ -15,11 +17,11 @@ export class AnunciosCompraController {
     return this.service.criar(dto, usuarioId);
   }
 
-  @Public()
-  @Get()
-  listarTodos() {
-    return this.service.listarTodos();
-  }
+@Public()
+@Get()
+listarTodos(@Query() filtros: FiltroAnuncioCompraDto) {
+  return this.service.listarTodos(filtros);
+}
 
   @Public()
   @Get(':id')
