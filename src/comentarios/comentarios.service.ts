@@ -1,26 +1,51 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
 import { CreateComentarioDto } from './dto/create-comentario.dto';
 import { UpdateComentarioDto } from './dto/update-comentario.dto';
+import { Comentario } from '../comentario.entity';
 
 @Injectable()
 export class ComentariosService {
-  create(createComentarioDto: CreateComentarioDto) {
-    return 'This action adds a new comentario';
+  constructor(
+    @InjectModel(Comentario)
+    private comentarioModel: typeof Comentario,
+  ) {}
+
+  async create(createComentarioDto: CreateComentarioDto): Promise<Comentario> {
+    return this.comentarioModel.create({ ...createComentarioDto });
   }
 
-  findAll() {
-    return `This action returns all comentarios`;
+  async findAll(): Promise<Comentario[]> {
+    return this.comentarioModel.findAll();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} comentario`;
+  async findOne(id: number): Promise<Comentario> {
+    const comentario = await this.comentarioModel.findByPk(id);
+    if (!comentario) {
+      throw new NotFoundException(`Comentário com ID ${id} não encontrado.`);
+    }
+    return comentario;
   }
 
-  update(id: number, updateComentarioDto: UpdateComentarioDto) {
-    return `This action updates a #${id} comentario`;
+  async update(id: number, updateComentarioDto: UpdateComentarioDto): Promise<Comentario> {
+    const [numberOfAffectedRows, [updatedComentario]] = await this.comentarioModel.update(
+      { ...updateComentarioDto },
+      { where: { id }, returning: true },
+    );
+
+    if (numberOfAffectedRows === 0) {
+      throw new NotFoundException(`Comentário com ID ${id} não encontrado.`);
+    }
+
+    return updatedComentario;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} comentario`;
+  async remove(id: number): Promise<void> {
+    const numberOfDeletedRows = await this.comentarioModel.destroy({ where: { id } });
+
+    if (numberOfDeletedRows === 0) {
+      throw new NotFoundException(`Comentário com ID ${id} não encontrado.`);
+    }
   }
 }
+
