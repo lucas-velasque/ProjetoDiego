@@ -9,4 +9,7 @@ export class atualizarCategoriaCartaDto {
 
   @IsOptional()
   tipo!: string;
+
+  @IsOptional()
+  status!: string;
 }

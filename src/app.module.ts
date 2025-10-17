@@ -9,6 +9,10 @@ import { ComentariosModule } from "./comentarios/comentarios.module";
 import { AnunciosVendaModule } from "./anunciosVenda/anuncioVenda.module";
 import { databaseConfig } from "./database/database.config";
 import { AnunciosCompraModule } from "./anunciosCompra/anuncioCompra.module";
+import { PropostasModule } from "./propostas/propostas.module";
+import { CategoriaCartasModule } from "./categoriaCartas/categoriaCartas.module";
+import { CategoriaLeilaoModule } from "./categoriaLeilao/categoriaLeilao.module";
+import { NivelUsuarioModule } from "./nivelUsuario/nivelUsuario.module";
 import { ConfigModule } from "@nestjs/config";
 
 @Module({
@@ -21,6 +25,10 @@ import { ConfigModule } from "@nestjs/config";
     ComentariosModule,
     AnunciosVendaModule,
     AnunciosCompraModule,
+    PropostasModule,
+    CategoriaCartasModule,
+    CategoriaLeilaoModule,
+    NivelUsuarioModule,
   ],
   controllers: [AppController],
   providers: [AppService],

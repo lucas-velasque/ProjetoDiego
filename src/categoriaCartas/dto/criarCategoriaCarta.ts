@@ -7,4 +7,6 @@ export class criarCategoriaCartaDto {
   descricao!: string;
   @IsString()
   tipo!: string;
+  @IsString()
+  status!: string;
 }

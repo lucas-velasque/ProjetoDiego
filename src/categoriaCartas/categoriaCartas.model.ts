@@ -1,7 +1,8 @@
-import { Table, Column, Model, DataType } from "sequelize-typescript";
+import { Table, Column, Model, DataType, HasMany } from "sequelize-typescript";
+import { Carta } from "../entities/carta.entity"; // verificar depois de finalizada
 
-@Table({ tableName: "categoria_leilao" })
-export class CategoriaLeilao extends Model<CategoriaLeilao> {
+@Table({ tableName: "categoria_cartas" })
+export class CategoriaCartas extends Model<CategoriaCartas> {
   @Column({
     type: DataType.INTEGER,
     autoIncrement: true,
@@ -12,6 +13,7 @@ export class CategoriaLeilao extends Model<CategoriaLeilao> {
   @Column({
     type: DataType.STRING,
     allowNull: false,
+    unique: true,
   })
   nome: string;
 
@@ -32,4 +34,7 @@ export class CategoriaLeilao extends Model<CategoriaLeilao> {
     allowNull: false,
   })
   status: string;
+
+  @HasMany(() => Carta)
+  cartas: Carta[];
 }
