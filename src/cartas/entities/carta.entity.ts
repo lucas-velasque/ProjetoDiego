@@ -1,54 +1,92 @@
-//Pessoal, precisei fazer a estrutura da entidade Carta pra poder testar a filtragem e paginação dos anúncios de venda.
-//Depois será necessário realizar uma implementação real.
+import { Column, DataType, Model, Table } from 'sequelize-typescript';
 
-import {
-  Table,
-  Column,
-  Model,
-  DataType,
-  CreatedAt,
-  UpdatedAt,
-} from 'sequelize-typescript';
-
-@Table({
-  tableName: 'cartas',
-  timestamps: true,
-})
-export class Carta extends Model {
+@Table({ tableName: 'cartas' })
+export class Carta extends Model<Carta> {
   @Column({
-    type: DataType.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
-  })
-  declare id: number;
-
-  @Column({
-    type: DataType.STRING(255),
+    type: DataType.STRING,
     allowNull: false,
   })
-  declare nome: string;
+  nome: string;
 
   @Column({
-    type: DataType.STRING(100),
-    allowNull: true,
+    type: DataType.STRING,
+    allowNull: false,
   })
-  declare tipo: string;
-
-  @Column({
-    type: DataType.STRING(50),
-    allowNull: true,
-  })
-  declare raridade: string;
+  tipo: string;
 
   @Column({
     type: DataType.INTEGER,
-    allowNull: true,
+    allowNull: false,
   })
-  declare pontos_saude: number;
+  pontosSaude: number;
 
-  @CreatedAt
-  declare created_at: Date;
+  @Column({
+    type: DataType.STRING,
+  })
+  categoria: string;
 
-  @UpdatedAt
-  declare updated_at: Date;
+  @Column({
+    type: DataType.TEXT,
+  })
+  descricaoPokedex: string;
+
+  @Column({
+    type: DataType.INTEGER,
+  })
+  danoCausado: number;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  ataque: string;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  custoAtaque: string;
+
+  @Column({
+    type: DataType.TEXT,
+  })
+  efeitosAtaque: string;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  ilustrador: string;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  simboloExpansao: string;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  numeroExpansao: string;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  raridade: string;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  fraqueza: string;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  resistencia: string;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  custoRecuo: string;
+
+  @Column({
+    type: DataType.TEXT,
+  })
+  descricaoNaPokedex: string;
 }
