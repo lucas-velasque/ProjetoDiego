@@ -66,6 +66,9 @@ export class AnuncioVenda extends Model {
   declare updated_at: Date;
 
   // Relacionamento com as cartas do anúncio 
-  @HasMany(() => AnuncioVendaCarta)
+  @HasMany(() => AnuncioVendaCarta, {
+    foreignKey: 'anuncio_venda_id',
+    as: 'cartas',
+  })
   declare cartas: AnuncioVendaCarta[];
 }
