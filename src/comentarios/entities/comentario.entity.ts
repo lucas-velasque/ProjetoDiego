@@ -1,18 +1,7 @@
 import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from 'sequelize-typescript';
-
-// Placeholder para o modelo User (assumindo que existe no projeto principal)
-@Table({ tableName: 'users' })
-export class User extends Model<User> {
-  @Column({ primaryKey: true, autoIncrement: true })
-  declare id: number;
-}
-
-// Placeholder para o modelo Product (assumindo que existe no projeto principal)
-@Table({ tableName: 'products' })
-export class Product extends Model<Product> {
-  @Column({ primaryKey: true, autoIncrement: true })
-  declare id: number;
-}
+//troquei os placeholders pelo modelo real 
+import { User } from 'src/users/user.model';
+import { Carta } from 'src/cartas/entities/carta.entity';
 
 @Table({
   tableName: 'comentarios',
@@ -52,15 +41,15 @@ export class Comentario extends Model<Comentario> {
   @BelongsTo(() => User)
   usuario: User;
 
-  @ForeignKey(() => Product)
+  @ForeignKey(() => Carta)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
   })
-  produtoId: number;
+  cartaId: number;
 
-  @BelongsTo(() => Product)
-  produto: Product;
+  @BelongsTo(() => Carta)
+  carta: Carta;
 
   @Column({
     type: DataType.DATE,

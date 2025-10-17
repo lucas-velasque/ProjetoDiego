@@ -2,7 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { CreateComentarioDto } from './dto/create-comentario.dto';
 import { UpdateComentarioDto } from './dto/update-comentario.dto';
-import { Comentario } from '../comentario.entity';
+//erro de caminho de import aqui
+import { Comentario } from './entities/comentario.entity';
 
 @Injectable()
 export class ComentariosService {
@@ -12,7 +13,7 @@ export class ComentariosService {
   ) {}
 
   async create(createComentarioDto: CreateComentarioDto): Promise<Comentario> {
-    return this.comentarioModel.create({ ...createComentarioDto });
+    return this.comentarioModel.create({ ...createComentarioDto } as any);
   }
 
   async findAll(): Promise<Comentario[]> {

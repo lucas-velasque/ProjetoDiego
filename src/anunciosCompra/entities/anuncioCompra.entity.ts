@@ -5,7 +5,10 @@ import {
   DataType,
   CreatedAt,
   UpdatedAt,
+  ForeignKey,
+  BelongsTo,
 } from 'sequelize-typescript';
+import { User } from 'src/users/user.model';
 
 @Table({
   tableName: 'anuncios_compra',
@@ -19,11 +22,15 @@ export class AnuncioCompra extends Model {
   })
   declare id: number;
 
+  @ForeignKey(() => User)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
   })
   declare usuario_id: number;
+
+  @BelongsTo(() => User)
+  declare usuario: User;
 
   // Atributos da carta procurada
   @Column({

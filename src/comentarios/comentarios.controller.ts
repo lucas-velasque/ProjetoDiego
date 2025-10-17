@@ -2,7 +2,8 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, HttpCo
 import { ComentariosService } from './comentarios.service';
 import { CreateComentarioDto } from './dto/create-comentario.dto';
 import { UpdateComentarioDto } from './dto/update-comentario.dto';
-import { Comentario } from '../comentario.entity';
+//erro de caminho de import aqui
+import { Comentario } from './entities/comentario.entity';
 
 @Controller('comentarios')
 export class ComentariosController {

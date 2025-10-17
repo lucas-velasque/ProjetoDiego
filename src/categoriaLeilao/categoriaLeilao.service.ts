@@ -8,7 +8,8 @@ import { Op } from "sequelize";
 import { criarCategoriaLeilaoDto } from "./dto/criarCategoriaLeilao";
 import { atualizarCategoriaLeilaoDto } from "./dto/atualizarCategoriaLeilao";
 import { CategoriaLeilao } from "./categoriaLeilao.model";
-import { Leilao } from "../leiloes/entities/leilao.model"; // verificar depois de finalizada
+//erro de nome de import aqui
+import { Leilao } from "src/leiloes/entities/leilao.model";
 
 @Injectable()
 export class CategoriaLeilaoService {
@@ -86,7 +87,7 @@ export class CategoriaLeilaoService {
 
     if (dados.tipo && dados.tipo !== categoria.tipo) {
       const usados = await this.leilaoModel.count({
-        where: { categoriaLeilaoId: id, status: "ativo" },
+        where: { categoriaLeilaoId: id, ativo: true },
       });
 
       if (usados > 0) {
@@ -96,9 +97,9 @@ export class CategoriaLeilaoService {
       }
     }
 
-    if (dados.status === false && categoria.status) {
+    if (dados.status === "inativo" && categoria.status !== "inativo") { //aqui tava com problema de tipo, precisei alterar
       const usados = await this.leilaoModel.count({
-        where: { categoriaLeilaoId: id, status: "ativo" },
+        where: { categoriaLeilaoId: id, ativo: true },
       });
 
       if (usados > 0) {
@@ -119,8 +120,10 @@ export class CategoriaLeilaoService {
       throw new NotFoundException("Categoria de leilão não encontrada.");
     }
 
+    // Corrigido: Leilao usa 'ativo' (boolean), não 'status' (string)
+    // Corrigido: count() retorna number, não array
     const usados = await this.leilaoModel.count({
-      where: { categoriaLeilaoId: id, status: "ativo" },
+      where: { categoriaLeilaoId: id, ativo: true },
     });
 
     if (usados > 0) {

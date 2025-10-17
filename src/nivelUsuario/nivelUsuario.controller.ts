@@ -13,7 +13,7 @@ import {
 } from "@nestjs/common";
 import { NivelUsuarioService } from "./nivelUsuario.service";
 import { criarNivelUsuarioDto } from "./dto/criarNivelUsuario";
-import { atualizarNivelUsuarioDto } from "./dto/atualizarNivelUsuario";
+import { AtualizarNivelUsuarioDto } from "./dto/atualizarNivelUsuario"; //aqui estava com erro de caminho de import
 import { Public } from "src/common/decorators/public.decorator";
 
 @Controller("NivelUsuario")
@@ -66,7 +66,7 @@ export class NivelUsuarioController {
   @Put(":id")
   async atualizar(
     @Param("id", ParseIntPipe) id: number,
-    @Body() atualizarDto: atualizarNivelUsuarioDto
+    @Body() atualizarDto: AtualizarNivelUsuarioDto
   ) {
     const nivelAtualizado = await this.servico.atualizar(id, atualizarDto);
     if (!nivelAtualizado) {

@@ -9,5 +9,6 @@ import { LeiloesController } from "./leiloes.controller";
   imports: [SequelizeModule.forFeature([Leilao, Lance])],
   controllers: [LeiloesController],
   providers: [LeiloesService],
+  exports: [SequelizeModule],
 })
 export class LeiloesModule {}

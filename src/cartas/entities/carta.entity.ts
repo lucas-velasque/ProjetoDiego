@@ -1,4 +1,7 @@
-import { Column, DataType, Model, Table } from 'sequelize-typescript';
+import { Column, DataType, Model, Table, ForeignKey, BelongsTo, HasMany } from 'sequelize-typescript';
+// Corrigi os imports porque tava dando erro
+import { CategoriaCartas } from 'src/categoriaCartas/categoriaCartas.model';
+import { AnuncioVendaCarta } from 'src/anunciosVenda/entities/anuncioVendaCarta.entity';
 
 @Table({ tableName: 'cartas' })
 export class Carta extends Model<Carta> {
@@ -89,4 +92,20 @@ export class Carta extends Model<Carta> {
     type: DataType.TEXT,
   })
   descricaoNaPokedex: string;
+
+  @ForeignKey(() => CategoriaCartas)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: true,
+  })
+  categoriaId: number;
+
+  @BelongsTo(() => CategoriaCartas)
+  categoria_relacionamento: CategoriaCartas;
+
+  @HasMany(() => AnuncioVendaCarta, {
+    foreignKey: 'carta_id',
+    as: 'anunciosVenda',
+  })
+  anunciosVenda: AnuncioVendaCarta[];
 }

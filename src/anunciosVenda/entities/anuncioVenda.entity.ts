@@ -7,7 +7,10 @@ import {
   HasMany,
   CreatedAt,
   UpdatedAt,
+  ForeignKey,
+  BelongsTo,
 } from 'sequelize-typescript';
+import { User } from 'src/users/user.model';
 
 @Table({
   tableName: 'anuncios_venda',
@@ -21,11 +24,15 @@ export class AnuncioVenda extends Model {
   })
   declare id: number;
 
+  @ForeignKey(() => User)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
   })
   declare usuario_id: number;
+
+  @BelongsTo(() => User)
+  declare usuario: User;
 
   @Column({
     type: DataType.STRING(255),

@@ -1,5 +1,6 @@
 import { Table, Column, Model, DataType, HasMany } from "sequelize-typescript";
-import { Carta } from "../entities/carta.entity"; // verificar depois de finalizada
+//tava com erro de nome de import aqui também
+import { Carta } from "src/cartas/entities/carta.entity";
 
 @Table({ tableName: "categoria_cartas" })
 export class CategoriaCartas extends Model<CategoriaCartas> {

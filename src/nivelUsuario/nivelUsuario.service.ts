@@ -8,7 +8,7 @@ import { criarNivelUsuarioDto } from "./dto/criarNivelUsuario";
 import { AtualizarNivelUsuarioDto } from "./dto/atualizarNivelUsuario";
 import { NivelUsuario } from "./nivelUsuario.model";
 import { InjectModel } from "@nestjs/sequelize";
-import { User } from "./entities/user.model"; // Trocar quando essa parte tiver finalizada
+import { User } from "../users/user.model"; // aqui estava com erro de import
 
 @Injectable()
 export class NivelUsuarioService {
