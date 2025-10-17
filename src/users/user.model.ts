@@ -1,5 +1,6 @@
 import { Table, Column, Model, DataType, BeforeCreate, BeforeUpdate } from 'sequelize-typescript';
 import * as bcrypt from 'bcrypt';
+import { ApiProperty } from '@nestjs/swagger';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -11,6 +12,7 @@ export enum UserRole {
   timestamps: true,
 })
 export class User extends Model<User> {
+  @ApiProperty({ example: 1, description: 'ID único de usuário' })
   @Column({
     type: DataType.INTEGER,
     primaryKey: true,
@@ -18,6 +20,7 @@ export class User extends Model<User> {
   })
   declare id: number;
 
+  @ApiProperty({ example: 'Joao', description: 'Nome de usuário único' })
   @Column({
     type: DataType.STRING,
     allowNull: false,
@@ -25,12 +28,14 @@ export class User extends Model<User> {
   })
   username: string;
 
+  @ApiProperty({ example: 'senha123', description: 'Senha do usuário' })
   @Column({
     type: DataType.STRING,
     allowNull: false,
   })
   password: string;
 
+  @ApiProperty({ example: 'admin', description: 'Papel do usuário', enum: UserRole })
   @Column({
     type: DataType.ENUM(...Object.values(UserRole)),
     allowNull: false,
