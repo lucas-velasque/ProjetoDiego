@@ -5,7 +5,9 @@ import { AnuncioVenda } from '../anunciosVenda/entities/anuncioVenda.entity';
 import { AnuncioCompra } from '../anunciosCompra/entities/anuncioCompra.entity';
 import { CreatePropostaDto } from './dto/createProposta.dto';
 import { UpdatePropostaDto } from './dto/updateProposta.dto';
+import { Op } from 'sequelize';
 
+import { FiltroPropostaDto } from './dto/filtroPropostas.dto';
 @Injectable()
 export class PropostasService {
   constructor(
@@ -40,16 +42,56 @@ export class PropostasService {
     return proposta;
   }
 
-  async listarPorAnuncio(tipo: string, anuncioId: number) {
-    return this.propostaModel.findAll({
-      where: {
-        anuncio_tipo: tipo,
-        anuncio_id: anuncioId,
-      },
-      order: [['created_at', 'DESC']],
-    });
+async listarPorAnuncio(tipo: string, anuncioId: number, filtros: FiltroPropostaDto) {
+  // (paginação)
+  const page = filtros.page || 1;
+  const limit = filtros.limit || 10;
+  const offset = (page - 1) * limit;
+
+  // (filtros)
+  const where: any = {
+    anuncio_tipo: tipo,
+    anuncio_id: anuncioId,
+  };
+
+  // Filtro de valor
+  if (filtros.valor_min || filtros.valor_max) {
+    where.valor_proposto = {};
+    if (filtros.valor_min) {
+      where.valor_proposto[Op.gte] = filtros.valor_min;
+    }
+    if (filtros.valor_max) {
+      where.valor_proposto[Op.lte] = filtros.valor_max;
+    }
   }
 
+  // Filtro de status
+  if (filtros.status) {
+    where.status = filtros.status;
+  }
+
+  // 3. Buscar dados
+  const { count, rows } = await this.propostaModel.findAndCountAll({
+    where,
+    limit,
+    offset,
+    order: [['created_at', 'DESC']],
+  });
+
+  // 4. Calcular meta
+  const totalPages = Math.ceil(count / limit);
+
+  // 5. Retornar resposta paginada
+  return {
+    data: rows,
+    meta: {
+      total: count,
+      page,
+      limit,
+      totalPages,
+    },
+  };
+}
   async buscarPorId(id: number) {
     const proposta = await this.propostaModel.findByPk(id);
 
