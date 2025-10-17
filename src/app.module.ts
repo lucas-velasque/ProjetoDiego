@@ -11,6 +11,9 @@ import { databaseConfig } from "./database/database.config";
 import { AnunciosCompraModule } from "./anunciosCompra/anuncioCompra.module";
 import { ConfigModule } from "@nestjs/config";
 import { LeiloesModule } from "./leiloes/leiloes.module";
+import { CategoriaCartasModule } from "./categoriaCartas/categoriaCartas.module";
+import { CategoriaLeilaoModule } from "./categoria-leilao/categoriaLeilao.module";
+import { NivelUsuarioModule } from "./nivel-usuario/nivelUsuario.module";
 
 @Module({
   imports: [
@@ -23,6 +26,9 @@ import { LeiloesModule } from "./leiloes/leiloes.module";
     AnunciosVendaModule,
     AnunciosCompraModule,
     LeiloesModule,
+    CategoriaCartasModule,
+    CategoriaLeilaoModule,
+    NivelUsuarioModule, //test
   ],
   controllers: [AppController],
   providers: [AppService],
