@@ -10,6 +10,7 @@ import { AnunciosVendaModule } from "./anunciosVenda/anuncioVenda.module";
 import { databaseConfig } from "./database/database.config";
 import { AnunciosCompraModule } from "./anunciosCompra/anuncioCompra.module";
 import { ConfigModule } from "@nestjs/config";
+import { LeiloesModule } from "./leiloes/leiloes.module";
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ConfigModule } from "@nestjs/config";
     ComentariosModule,
     AnunciosVendaModule,
     AnunciosCompraModule,
+    LeiloesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
