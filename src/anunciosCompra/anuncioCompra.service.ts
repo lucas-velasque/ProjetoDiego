@@ -3,6 +3,8 @@ import { InjectModel } from '@nestjs/sequelize';
 import { AnuncioCompra } from './entities/anuncioCompra.entity';
 import { CreateAnuncioCompraDto } from './dto/createAnuncioCompra.dto';
 import { UpdateAnuncioCompraDto } from './dto/updateAnuncioCompra.dto';
+import { Op } from 'sequelize';
+import { FiltroAnuncioCompraDto } from './dto/filtroAnuncioCompra.dto';
 
 @Injectable()
 export class AnunciosCompraService {
@@ -29,12 +31,70 @@ export class AnunciosCompraService {
     return anuncio;
   }
 
-  async listarTodos() {
-    return this.anuncioCompraModel.findAll({
-      where: { status: 'ativo' },
-      order: [['created_at', 'DESC']],
-    });
+async listarTodos(filtros: FiltroAnuncioCompraDto) {
+  // (paginação)
+  const page = filtros.page || 1;
+  const limit = filtros.limit || 10;
+  const offset = (page - 1) * limit;
+
+  // (filtros)
+  const where: any = {};
+
+  // Filtro de nome da carta
+  if (filtros.nome_carta) {
+    where.nome_carta = { [Op.like]: `%${filtros.nome_carta}%` };
   }
+
+  // Filtro de raridade
+  if (filtros.raridade) {
+    where.raridade = filtros.raridade;
+  }
+
+  // Filtro de preço máximo
+  if (filtros.preco_maximo) {
+    where.preco_maximo = { [Op.lte]: filtros.preco_maximo };
+  }
+
+  // Filtro de status
+  if (filtros.status) {
+    where.status = filtros.status;
+  } else {
+    where.status = 'ativo'; // Padrão: só ativos
+  }
+
+  // Filtro de data
+  if (filtros.data_inicio || filtros.data_fim) {
+    where.created_at = {};
+    if (filtros.data_inicio) {
+      where.created_at[Op.gte] = new Date(filtros.data_inicio);
+    }
+    if (filtros.data_fim) {
+      where.created_at[Op.lte] = new Date(filtros.data_fim);
+    }
+  }
+
+  // 3. Buscar dados
+  const { count, rows } = await this.anuncioCompraModel.findAndCountAll({
+    where,
+    limit,
+    offset,
+    order: [['created_at', 'DESC']],
+  });
+
+  // 4. Calcular meta
+  const totalPages = Math.ceil(count / limit);
+
+  // 5. Retornar resposta paginada
+  return {
+    data: rows,
+    meta: {
+      total: count,
+      page,
+      limit,
+      totalPages,
+    },
+  };
+}
 
   async buscarPorId(id: number) {
     const anuncio = await this.anuncioCompraModel.findByPk(id);

@@ -14,7 +14,7 @@ import { CategoriaCartasModule } from "./categoriaCartas/categoriaCartas.module"
 import { CategoriaLeilaoModule } from "./categoriaLeilao/categoriaLeilao.module";
 import { NivelUsuarioModule } from "./nivelUsuario/nivelUsuario.module";
 import { ConfigModule } from "@nestjs/config";
-
+import { LeiloesModule } from "./leiloes/leiloes.module";
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -29,6 +29,7 @@ import { ConfigModule } from "@nestjs/config";
     CategoriaCartasModule,
     CategoriaLeilaoModule,
     NivelUsuarioModule,
+    LeiloesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
