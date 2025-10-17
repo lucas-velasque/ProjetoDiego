@@ -15,6 +15,7 @@ import { CategoriaLeilaoModule } from "./categoriaLeilao/categoriaLeilao.module"
 import { NivelUsuarioModule } from "./nivelUsuario/nivelUsuario.module";
 import { ConfigModule } from "@nestjs/config";
 import { LeiloesModule } from "./leiloes/leiloes.module";
+import { CarrinhoModule } from "./carrinho/carrinho.module";
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -30,6 +31,7 @@ import { LeiloesModule } from "./leiloes/leiloes.module";
     CategoriaLeilaoModule,
     NivelUsuarioModule,
     LeiloesModule,
+    CarrinhoModule,
   ],
   controllers: [AppController],
   providers: [AppService],
