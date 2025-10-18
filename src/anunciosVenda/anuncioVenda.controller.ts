@@ -3,6 +3,7 @@ import { AnunciosVendaService } from './anuncioVenda.service';
 import { CreateAnuncioVendaDto } from './dto/createAnuncioVenda.dto';
 import { UpdateAnuncioVendaDto } from './dto/updateAnuncioVenda.dto';
 import { Public } from '../common/decorators/public.decorator';
+import { UsuarioAtual } from '../common/decorators/usuarioAtual.decorator';
 import { FiltroAnuncioVendaDto } from './dto/filtroAnuncioVenda.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 
@@ -12,14 +13,14 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth }
 export class AnunciosVendaController {
   constructor(private readonly service: AnunciosVendaService) {}
 
-  @Public()
   @Post()
   @ApiOperation({ summary: 'Criar um novo anúncio de venda' })
   @ApiResponse({ status: 201, description: 'Anúncio criado com sucesso' })
   @ApiResponse({ status: 400, description: 'Dados inválidos' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
-  criar(@Body() dto: CreateAnuncioVendaDto, @Request() req) {
-    const usuarioId = 1; // TODO: token JWT
+  criar(@Body() dto: CreateAnuncioVendaDto, @UsuarioAtual() usuario) {
+    // Extrai o ID do usuário autenticado do token JWT
+    const usuarioId = usuario.sub;
     return this.service.criar(dto, usuarioId);
   }
 

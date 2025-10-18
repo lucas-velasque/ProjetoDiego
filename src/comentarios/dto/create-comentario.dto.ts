@@ -15,10 +15,8 @@ export class CreateComentarioDto {
   @ApiProperty({ description: 'Avaliação do comentário (1 a 5 estrelas)', example: 5, minimum: 1, maximum: 5, required: false })
   avaliacao?: number;
 
-  @IsNumber()
-  @IsNotEmpty()
-  @ApiProperty({ description: 'ID do usuário que faz o comentário', example: 1 })
-  usuarioId: number;
+  // REMOVIDO: usuarioId não deve vir do body por questões de segurança
+  // O ID do usuário será extraído do token JWT automaticamente
 
   @IsNumber()
   @IsNotEmpty()

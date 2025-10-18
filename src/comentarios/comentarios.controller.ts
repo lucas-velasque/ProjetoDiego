@@ -4,6 +4,8 @@ import { ComentariosService } from './comentarios.service';
 import { CreateComentarioDto } from './dto/create-comentario.dto';
 import { UpdateComentarioDto } from './dto/update-comentario.dto';
 import { Comentario } from './entities/comentario.entity';
+import { UsuarioAtual } from '../common/decorators/usuarioAtual.decorator';
+import { Public } from '../common/decorators/public.decorator';
 
 @ApiTags('comentarios')
 @Controller('comentarios')
@@ -14,12 +16,16 @@ export class ComentariosController {
   @ApiOperation({ summary: 'Cria um novo comentário' })
   @ApiResponse({ status: 201, description: 'O comentário foi criado com sucesso.', type: Comentario })
   @ApiResponse({ status: 400, description: 'Requisição inválida.' })
+  @ApiResponse({ status: 401, description: 'Não autorizado.' })
   @ApiBody({ type: CreateComentarioDto })
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createComentarioDto: CreateComentarioDto): Promise<Comentario> {
-    return this.comentariosService.create(createComentarioDto);
+  create(@Body() createComentarioDto: CreateComentarioDto, @UsuarioAtual() usuario): Promise<Comentario> {
+    // Extrai o ID do usuário autenticado do token JWT
+    const usuarioId = usuario.sub;
+    return this.comentariosService.create(createComentarioDto, usuarioId);
   }
 
+  @Public()
   @Get()
   @ApiOperation({ summary: 'Retorna todos os comentários' })
   @ApiResponse({ status: 200, description: 'Lista de comentários retornada com sucesso.', type: [Comentario] })
@@ -27,6 +33,7 @@ export class ComentariosController {
     return this.comentariosService.findAll();
   }
 
+  @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Retorna um comentário pelo ID' })
   @ApiResponse({ status: 200, description: 'Comentário encontrado com sucesso.', type: Comentario })

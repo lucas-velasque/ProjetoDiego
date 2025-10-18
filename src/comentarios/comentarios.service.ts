@@ -11,8 +11,12 @@ export class ComentariosService {
     private comentarioModel: typeof Comentario,
   ) {}
 
-  async create(createComentarioDto: CreateComentarioDto): Promise<Comentario> {
-    return this.comentarioModel.create({ ...createComentarioDto } as any);
+  async create(createComentarioDto: CreateComentarioDto, usuarioId: number): Promise<Comentario> {
+    // Adiciona o usuarioId extraído do JWT ao objeto de criação
+    return this.comentarioModel.create({
+      ...createComentarioDto,
+      usuarioId
+    } as any);
   }
 
   async findAll(): Promise<Comentario[]> {
