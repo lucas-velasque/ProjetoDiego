@@ -39,7 +39,7 @@ export class NivelUsuarioController {
   async listar(
     @Query("nome") nome?: string,
     @Query("page") page?: string,
-    @Query("limit") limit?: string
+    @Query("limit") limit?: string,
   ) {
     const filtros = {
       nome,
@@ -66,12 +66,12 @@ export class NivelUsuarioController {
   @Put(":id")
   async atualizar(
     @Param("id", ParseIntPipe) id: number,
-    @Body() atualizarDto: AtualizarNivelUsuarioDto
+    @Body() atualizarDto: AtualizarNivelUsuarioDto,
   ) {
     const nivelAtualizado = await this.servico.atualizar(id, atualizarDto);
     if (!nivelAtualizado) {
       throw new NotFoundException(
-        "Nível de usuário não encontrado para atualização."
+        "Nível de usuário não encontrado para atualização.",
       );
     }
     return {
@@ -86,7 +86,7 @@ export class NivelUsuarioController {
     const resultado = await this.servico.deletar(id);
     if (!resultado) {
       throw new NotFoundException(
-        "Nível de usuário não encontrado para exclusão."
+        "Nível de usuário não encontrado para exclusão.",
       );
     }
     return { mensagem: "Nível de usuário excluído com sucesso." };

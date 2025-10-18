@@ -17,10 +17,11 @@ import { CategoriaLeilao } from "src/categoriaLeilao/categoriaLeilao.model";
 @Table({ tableName: "leiloes", timestamps: true })
 export class Leilao extends Model<Leilao> {
   @PrimaryKey
-  @Default(() => uuid())
+  @Default(uuid)
   @Column(DataType.UUID)
   declare id: string;
-
+  @Column
+  status: string;
   @Column(DataType.STRING) titulo!: string;
   @Column(DataType.TEXT) descricao?: string;
 
@@ -51,4 +52,8 @@ export class Leilao extends Model<Leilao> {
   categoria!: CategoriaLeilao;
 
   @HasMany(() => Lance) lances!: Lance[];
+  id_usuario: number;
+  @Column
+  ganhadorId: number;
+  valor_incremento: number;
 }
