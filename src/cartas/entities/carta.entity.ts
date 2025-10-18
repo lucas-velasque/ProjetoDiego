@@ -1,5 +1,4 @@
 import { Column, DataType, Model, Table, ForeignKey, BelongsTo, HasMany } from 'sequelize-typescript';
-// Corrigi os imports porque tava dando erro
 import { CategoriaCartas } from 'src/categoriaCartas/categoriaCartas.model';
 import { AnuncioVendaCarta } from 'src/anunciosVenda/entities/anuncioVendaCarta.entity';
 
