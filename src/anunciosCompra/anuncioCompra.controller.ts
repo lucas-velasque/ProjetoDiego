@@ -3,6 +3,7 @@ import { AnunciosCompraService } from './anuncioCompra.service';
 import { CreateAnuncioCompraDto } from './dto/createAnuncioCompra.dto';
 import { UpdateAnuncioCompraDto } from './dto/updateAnuncioCompra.dto';
 import { Public } from '../common/decorators/public.decorator';
+import { UsuarioAtual } from '../common/decorators/usuarioAtual.decorator';
 import { FiltroAnuncioCompraDto } from './dto/filtroAnuncioCompra.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiQuery } from '@nestjs/swagger';
 
@@ -11,30 +12,30 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiQuery } from 
 export class AnunciosCompraController {
   constructor(private readonly service: AnunciosCompraService) {}
 
-  @Public()
   @Post()
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Criar anúncio de compra',
-    description: 'Cria um novo anúncio de compra para o usuário autenticado' 
+    description: 'Cria um novo anúncio de compra para o usuário autenticado'
   })
-  @ApiBody({ 
+  @ApiBody({
     type: CreateAnuncioCompraDto,
-    description: 'Dados necessários para criar o anúncio de compra' 
+    description: 'Dados necessários para criar o anúncio de compra'
   })
-  @ApiResponse({ 
-    status: 201, 
-    description: 'Anúncio de compra criado com sucesso' 
+  @ApiResponse({
+    status: 201,
+    description: 'Anúncio de compra criado com sucesso'
   })
-  @ApiResponse({ 
-    status: 400, 
-    description: 'Dados inválidos fornecidos' 
+  @ApiResponse({
+    status: 400,
+    description: 'Dados inválidos fornecidos'
   })
-  @ApiResponse({ 
-    status: 401, 
-    description: 'Não autorizado' 
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado'
   })
-  criar(@Body() dto: CreateAnuncioCompraDto) {
-    const usuarioId = 1; // TODO: pegar do token JWT
+  criar(@Body() dto: CreateAnuncioCompraDto, @UsuarioAtual() usuario) {
+    // Extrai o ID do usuário autenticado do token JWT
+    const usuarioId = usuario.sub;
     return this.service.criar(dto, usuarioId);
   }
 

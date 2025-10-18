@@ -4,9 +4,9 @@ import { ApiProperty } from "@nestjs/swagger";
 
 export class CriarLanceDto {
   @ApiProperty({
-    description: 'Valor do lance para a carta Pokémon',
+    description: "Valor do lance para a carta Pokémon",
     minimum: 0,
-    example: 1500
+    example: 1500,
   })
   @Type(() => Number)
   @IsNumber()
@@ -14,17 +14,17 @@ export class CriarLanceDto {
   valor!: number;
 
   @ApiProperty({
-    description: 'ID do usuário que está realizando o lance',
-    example: 1
+    description: "ID do usuário que está realizando o lance",
+    example: 1,
   })
   @Type(() => Number)
   @IsNumber()
   id_usuario!: number;
 
   @ApiProperty({
-    description: 'ID do leilão onde o lance será realizado',
+    description: "ID do leilão onde o lance será realizado",
     example: 1,
-    required: false
+    required: false,
   })
   @IsOptional()
   @Type(() => Number)

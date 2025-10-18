@@ -4,10 +4,10 @@ import { ApiProperty } from "@nestjs/swagger";
 
 export class AtualizarLanceDto {
   @ApiProperty({
-    description: 'Valor do lance para carta Pokémon',
+    description: "Valor do lance para carta Pokémon",
     minimum: 0,
     example: 1500,
-    required: false
+    required: false,
   })
   @IsOptional()
   @Type(() => Number)

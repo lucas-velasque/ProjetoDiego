@@ -3,6 +3,7 @@ import { PropostasService } from './propostas.service';
 import { CreatePropostaDto } from './dto/createProposta.dto';
 import { UpdatePropostaDto } from './dto/updateProposta.dto';
 import { Public } from '../common/decorators/public.decorator';
+import { UsuarioAtual } from '../common/decorators/usuarioAtual.decorator';
 import { FiltroPropostaDto } from './dto/filtroPropostas.dto';
 import { Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiQuery } from '@nestjs/swagger';
@@ -12,7 +13,6 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiQuery } from 
 export class PropostasController {
   constructor(private readonly service: PropostasService) {}
 
-  @Public()
   @Post('anuncios/:tipo/:id/propostas')
   @ApiOperation({ summary: 'Criar uma nova proposta para um anúncio' })
   @ApiParam({ name: 'tipo', description: 'Tipo do anúncio', example: 'venda' })
@@ -25,8 +25,10 @@ export class PropostasController {
     @Param('tipo') tipo: string,
     @Param('id') anuncioId: string,
     @Body() dto: CreatePropostaDto,
+    @UsuarioAtual() usuario,
   ) {
-    const usuarioId = 1; // TODO: pegar do token JWT
+    // Extrai o ID do usuário autenticado do token JWT
+    const usuarioId = usuario.sub;
     return this.service.criar(dto, tipo, +anuncioId, usuarioId);
   }
 

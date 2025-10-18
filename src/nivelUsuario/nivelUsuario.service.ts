@@ -17,7 +17,7 @@ export class NivelUsuarioService {
     private readonly nivelUsuarioModel: typeof NivelUsuario,
 
     @InjectModel(User) // aqui também
-    private readonly usuarioModel: typeof User // aqui também
+    private readonly usuarioModel: typeof User, // aqui também
   ) {}
 
   private async existeNivelBase(): Promise<boolean> {
@@ -30,7 +30,7 @@ export class NivelUsuarioService {
   async criar(dados: criarNivelUsuarioDto): Promise<NivelUsuario> {
     if (dados.pontuacaoMinima !== undefined && dados.pontuacaoMinima < 0) {
       throw new BadRequestException(
-        "A pontuacao minima não pode ser negativa."
+        "A pontuacao minima não pode ser negativa.",
       );
     }
 
@@ -39,7 +39,7 @@ export class NivelUsuarioService {
     });
     if (existePontuacao) {
       throw new BadRequestException(
-        "Já existe nível com essa pontuação mínima."
+        "Já existe nível com essa pontuação mínima.",
       );
     }
 
@@ -47,7 +47,7 @@ export class NivelUsuarioService {
 
     if (!(await this.existeNivelBase())) {
       throw new BadRequestException(
-        "Deve existir um nível base com pontuação mínima 0."
+        "Deve existir um nível base com pontuação mínima 0.",
       );
     }
 
@@ -93,7 +93,7 @@ export class NivelUsuarioService {
 
     if (dados.pontuacaoMinima !== undefined && dados.pontuacaoMinima < 0) {
       throw new BadRequestException(
-        "A pontuacao minima não pode ser negativa."
+        "A pontuacao minima não pode ser negativa.",
       );
     }
 
@@ -109,7 +109,7 @@ export class NivelUsuarioService {
       });
       if (existePontuacao) {
         throw new BadRequestException(
-          "Já existe nível com essa pontuação mínima."
+          "Já existe nível com essa pontuação mínima.",
         );
       }
     }
@@ -118,7 +118,7 @@ export class NivelUsuarioService {
 
     if (!(await this.existeNivelBase())) {
       throw new BadRequestException(
-        "Deve existir um nível base com pontuação mínima 0."
+        "Deve existir um nível base com pontuação mínima 0.",
       );
     }
 
@@ -131,7 +131,7 @@ export class NivelUsuarioService {
     });
     if (usuariosComNivel > 0) {
       throw new BadRequestException(
-        "Nível em uso por usuários, não pode ser deletado."
+        "Nível em uso por usuários, não pode ser deletado.",
       );
     }
 
@@ -150,7 +150,7 @@ export class NivelUsuarioService {
 
     if (!nivel) {
       throw new NotFoundException(
-        "Nenhum nível encontrado para a pontuação informada."
+        "Nenhum nível encontrado para a pontuação informada.",
       );
     }
 
