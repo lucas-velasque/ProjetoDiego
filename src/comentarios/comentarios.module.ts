@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { ComentariosService } from './comentarios.service';
 import { ComentariosController } from './comentarios.controller';
-//erro de caminho de import aqui
 import { Comentario } from './entities/comentario.entity';
 
 @Module({
