@@ -1,26 +1,37 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { Carta } from './entities/carta.entity';
 import { CreateCartaDto } from './dto/create-carta.dto';
 import { UpdateCartaDto } from './dto/update-carta.dto';
 
 @Injectable()
 export class CartasService {
-  create(createCartaDto: CreateCartaDto) {
-    return 'This action adds a new carta';
+  constructor(
+    @InjectModel(Carta)
+    private cartaModel: typeof Carta,
+  ) {}
+
+  async create(createCartaDto: CreateCartaDto): Promise<Carta> {
+    return this.cartaModel.create(createCartaDto as any);
   }
 
-  findAll() {
-    return `This action returns all cartas`;
+  async findAll(): Promise<Carta[]> {
+    return this.cartaModel.findAll();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} carta`;
+  async findOne(id: number): Promise<Carta> {
+    const carta = await this.cartaModel.findByPk(id);
+    if (!carta) throw new NotFoundException('Carta não encontrada');
+    return carta;
   }
 
-  update(id: number, updateCartaDto: UpdateCartaDto) {
-    return `This action updates a #${id} carta`;
+  async update(id: number, updateCartaDto: UpdateCartaDto): Promise<Carta> {
+    const carta = await this.findOne(id);
+    return carta.update(updateCartaDto);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} carta`;
+  async remove(id: number): Promise<void> {
+    const carta = await this.findOne(id);
+    await carta.destroy();
   }
 }

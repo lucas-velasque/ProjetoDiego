@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
+import { SequelizeModule } from '@nestjs/sequelize';
 import { CartasService } from './cartas.service';
 import { CartasController } from './cartas.controller';
-import { SequelizeModule } from '@nestjs/sequelize';
 import { Carta } from './entities/carta.entity';
 
 @Module({
+  imports: [SequelizeModule.forFeature([Carta])],
   controllers: [CartasController],
   providers: [CartasService],
-  imports: [SequelizeModule.forFeature([Carta])],
 })
 export class CartasModule {}

@@ -60,7 +60,13 @@ export class LeiloesService {
   }
 
   async atualizar(id: number, dados: AtualizarLeilaoDto) {
-    return this.leiloes.update(dados, { where: { id } });
+    const dadosAtualizados: any = { ...dados };
+
+    if (dadosAtualizados.categoria !== undefined) {
+      delete dadosAtualizados.categoria;
+    }
+
+    return this.leiloes.update(dadosAtualizados, { where: { id } });
   }
 
   async deletar(id: number) {

@@ -30,6 +30,8 @@ export class AnuncioVendaCarta extends Model {
   })
   declare anuncio_venda_id: number;
 
+  // Relacionamento com Carta: cada entrada refere-se a uma carta específica
+  @ForeignKey(() => Carta)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
