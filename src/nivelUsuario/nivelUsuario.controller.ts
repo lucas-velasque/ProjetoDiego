@@ -10,18 +10,64 @@ import {
   Query,
   NotFoundException,
   BadRequestException,
+  UseGuards,
 } from "@nestjs/common";
 import { NivelUsuarioService } from "./nivelUsuario.service";
 import { criarNivelUsuarioDto } from "./dto/criarNivelUsuario";
-import { AtualizarNivelUsuarioDto } from "./dto/atualizarNivelUsuario"; //aqui estava com erro de caminho de import
-import { Public } from "src/common/decorators/public.decorator";
+import { AtualizarNivelUsuarioDto } from "./dto/atualizarNivelUsuario";
+import { RolesGuard } from "./../common/guards/roles.guard";
+import { Roles } from "./../common/decorators/roles.decorator";
+import {
+  ApiBody,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from "@nestjs/swagger";
 
+@ApiTags("NivelUsuario")
 @Controller("NivelUsuario")
+@UseGuards(RolesGuard)
 export class NivelUsuarioController {
   constructor(private readonly servico: NivelUsuarioService) {}
 
-  @Public()
   @Post()
+  @Roles("admin")
+  @ApiOperation({ summary: "Criar um novo nível de usuário" })
+  @ApiResponse({
+    status: 201,
+    description: "Nível de usuário criado com sucesso.",
+  })
+  @ApiResponse({
+    status: 400,
+    description: "Erro ao criar nível de usuário.",
+  })
+  @ApiBody({ type: criarNivelUsuarioDto, required: true })
+  @ApiOperation({ summary: "Listar categorias de usuario" })
+  @ApiResponse({
+    status: 200,
+    description: "Lista de nivel de usuario retornada com sucesso.",
+  })
+  @ApiQuery({
+    name: "nome",
+    required: false,
+    description: "Filtrar nivel por nome",
+  })
+  @ApiQuery({
+    name: "corIdentificacao",
+    required: false,
+    description: "Filtrar usuario por corIdentificacao",
+  })
+  @ApiQuery({
+    name: "page",
+    required: false,
+    description: "Número da página para paginação",
+  })
+  @ApiQuery({
+    name: "limit",
+    required: false,
+    description: "Limite de itens por página",
+  })
   async criar(@Body() criarDto: criarNivelUsuarioDto) {
     try {
       const nivelCriado = await this.servico.criar(criarDto);
@@ -34,15 +80,17 @@ export class NivelUsuarioController {
     }
   }
 
-  @Public()
-  @Get()
+  @Get(":id")
+  @Roles("admin", "user")
   async listar(
     @Query("nome") nome?: string,
+    @Query("corIdentificacao") corIdentificacao?: string,
     @Query("page") page?: string,
-    @Query("limit") limit?: string,
+    @Query("limit") limit?: string
   ) {
     const filtros = {
       nome,
+      corIdentificacao,
       page: page ? parseInt(page, 10) : undefined,
       limit: limit ? parseInt(limit, 10) : undefined,
     };
@@ -51,6 +99,20 @@ export class NivelUsuarioController {
 
   @Public()
   @Get(":id")
+  @ApiOperation({ summary: "Buscar um nivel de usuario por ID" })
+  @ApiResponse({
+    status: 200,
+    description: "Nivel de usuario encontrado com sucesso.",
+  })
+  @ApiResponse({
+    status: 404,
+    description: "Nivel de usuario não encontrado.",
+  })
+  @ApiParam({
+    name: "id",
+    description: "ID do nivel de usario",
+    type: Number,
+  })
   async buscarUm(@Param("id", ParseIntPipe) id: number) {
     const nivel = await this.servico.buscar_um(id);
     if (!nivel) {
@@ -62,16 +124,31 @@ export class NivelUsuarioController {
     };
   }
 
-  @Public()
   @Put(":id")
+  @Roles("admin")
+  @ApiOperation({ summary: "Atualizar um nivel de usuario" })
+  @ApiResponse({
+    status: 200,
+    description: "Nivel de usuario atualizado com sucesso.",
+  })
+  @ApiResponse({
+    status: 404,
+    description: "Nivel de usuario não encontrado para atualização.",
+  })
+  @ApiParam({
+    name: "id",
+    description: "ID do nivel de usuario",
+    type: Number,
+  })
+  @ApiBody({ type: AtualizarNivelUsuarioDto })
   async atualizar(
     @Param("id", ParseIntPipe) id: number,
-    @Body() atualizarDto: AtualizarNivelUsuarioDto,
+    @Body() atualizarDto: AtualizarNivelUsuarioDto
   ) {
     const nivelAtualizado = await this.servico.atualizar(id, atualizarDto);
     if (!nivelAtualizado) {
       throw new NotFoundException(
-        "Nível de usuário não encontrado para atualização.",
+        "Nível de usuário não encontrado para atualização."
       );
     }
     return {
@@ -80,13 +157,27 @@ export class NivelUsuarioController {
     };
   }
 
-  @Public()
   @Delete(":id")
+  @Roles("admin")
+  @ApiOperation({ summary: "Excluir um nivel de usuario" })
+  @ApiResponse({
+    status: 200,
+    description: "Nivel de usuario excluído com sucesso.",
+  })
+  @ApiResponse({
+    status: 404,
+    description: "Nivel de usuario encontrado para exclusão.",
+  })
+  @ApiParam({
+    name: "id",
+    description: "ID do nivel de usuario",
+    type: Number,
+  })
   async deletar(@Param("id", ParseIntPipe) id: number) {
     const resultado = await this.servico.deletar(id);
     if (!resultado) {
       throw new NotFoundException(
-        "Nível de usuário não encontrado para exclusão.",
+        "Nível de usuário não encontrado para exclusão."
       );
     }
     return { mensagem: "Nível de usuário excluído com sucesso." };
