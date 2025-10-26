@@ -1,5 +1,8 @@
+import { RolesGuard } from "./../common/guards/roles.guard";
+import { Roles } from "./../common/decorators/roles.decorator";
 import {
   Controller,
+  UseGuards,
   Get,
   Post,
   Body,
@@ -14,7 +17,6 @@ import {
 import { CategoriaCartasService } from "./categoriaCartas.service";
 import { criarCategoriaCartaDto } from "./dto/criarCategoriaCarta";
 import { atualizarCategoriaCartaDto } from "./dto/atualizarCategoriaCarta";
-import { Public } from "src/common/decorators/public.decorator";
 import {
   ApiTags,
   ApiOperation,
@@ -26,17 +28,21 @@ import {
 
 @ApiTags("categoria-cartas")
 @Controller("categoriaCartas")
+@UseGuards(RolesGuard)
 export class CategoriaCartasController {
   constructor(private readonly servico: CategoriaCartasService) {}
 
-  @Public()
   @Post()
+  @Roles("admin")
   @ApiOperation({ summary: "Criar uma nova categoria de carta" })
   @ApiResponse({
     status: 201,
     description: "Categoria de carta criada com sucesso.",
   })
-  @ApiResponse({ status: 400, description: "Erro ao criar categoria de carta." })
+  @ApiResponse({
+    status: 400,
+    description: "Erro ao criar categoria de carta.",
+  })
   @ApiBody({ type: criarCategoriaCartaDto })
   async criar(@Body() dadosCriacao: criarCategoriaCartaDto) {
     try {
@@ -50,8 +56,8 @@ export class CategoriaCartasController {
     }
   }
 
-  @Public()
   @Get()
+  @Roles("admin", "user")
   @ApiOperation({ summary: "Listar categorias de cartas" })
   @ApiResponse({
     status: 200,
@@ -61,6 +67,11 @@ export class CategoriaCartasController {
     name: "nome",
     required: false,
     description: "Filtrar categorias por nome",
+  })
+  @ApiQuery({
+    name: "tipo",
+    required: false,
+    description: "Filtrar categorias por tipo",
   })
   @ApiQuery({
     name: "page",
@@ -74,6 +85,7 @@ export class CategoriaCartasController {
   })
   async listar(
     @Query("nome") nome?: string,
+    @Query("tipo") tipo?: string,
     @Query("page") pagina?: string,
     @Query("limit") limite?: string
   ) {
@@ -85,8 +97,8 @@ export class CategoriaCartasController {
     return await this.servico.listar(filtros);
   }
 
-  @Public()
   @Get(":id")
+  @Roles("admin", "user")
   @ApiOperation({ summary: "Buscar uma categoria de carta por ID" })
   @ApiResponse({
     status: 200,
@@ -112,8 +124,8 @@ export class CategoriaCartasController {
     };
   }
 
-  @Public()
   @Put(":id")
+  @Roles("admin")
   @ApiOperation({ summary: "Atualizar uma categoria de carta" })
   @ApiResponse({
     status: 200,
@@ -150,8 +162,8 @@ export class CategoriaCartasController {
     };
   }
 
-  @Public()
   @Delete(":id")
+  @Roles("admin")
   @ApiOperation({ summary: "Excluir uma categoria de carta" })
   @ApiResponse({
     status: 200,
