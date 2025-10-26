@@ -1,170 +1,186 @@
 import {
-  Injectable,
-  BadRequestException,
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Put,
+  ParseIntPipe,
+  Query,
   NotFoundException,
+  BadRequestException,
+  UseGuards,
 } from "@nestjs/common";
-import { Op } from "sequelize";
+import { NivelUsuarioService } from "./nivelUsuario.service";
 import { criarNivelUsuarioDto } from "./dto/criarNivelUsuario";
 import { AtualizarNivelUsuarioDto } from "./dto/atualizarNivelUsuario";
-import { NivelUsuario } from "./nivelUsuario.model";
-import { InjectModel } from "@nestjs/sequelize";
-import { User } from "../users/user.model";
+import { RolesGuard } from "./../common/guards/roles.guard";
+import { Roles } from "./../common/decorators/roles.decorator";
+import {
+  ApiBody,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+  ApiParam,
+} from "@nestjs/swagger";
 
-@Injectable()
-export class NivelUsuarioService {
-  constructor(
-    @InjectModel(NivelUsuario)
-    private readonly nivelUsuarioModel: typeof NivelUsuario,
+@ApiTags("NivelUsuario")
+@Controller("NivelUsuario")
+@UseGuards(RolesGuard)
+export class NivelUsuarioController {
+  constructor(private readonly servico: NivelUsuarioService) {}
 
-    @InjectModel(User)
-    private readonly usuarioModel: typeof User
-  ) {}
-
-  private async existeNivelBase(): Promise<boolean> {
-    const nivelBase = await this.nivelUsuarioModel.findOne({
-      where: { pontuacaoMinima: 0 },
-    });
-    return !!nivelBase;
+  @Post()
+  @Roles("admin")
+  @ApiOperation({ summary: "Criar um novo nível de usuário" })
+  @ApiResponse({
+    status: 201,
+    description: "Nível de usuário criado com sucesso.",
+  })
+  @ApiResponse({
+    status: 400,
+    description: "Erro ao criar nível de usuário.",
+  })
+  @ApiBody({ type: criarNivelUsuarioDto, required: true })
+  async criar(@Body() criarDto: criarNivelUsuarioDto) {
+    try {
+      const nivelCriado = await this.servico.criar(criarDto);
+      return {
+        mensagem: "Nível de usuário criado com sucesso.",
+        dados: nivelCriado,
+      };
+    } catch (error) {
+      throw new BadRequestException("Erro ao criar nível de usuário.");
+    }
   }
 
-  async criar(dados: criarNivelUsuarioDto): Promise<NivelUsuario> {
-    if (dados.pontuacaoMinima !== undefined && dados.pontuacaoMinima < 0) {
-      throw new BadRequestException(
-        "A pontuacao minima não pode ser negativa."
-      );
-    }
-
-    const existePontuacao = await this.nivelUsuarioModel.findOne({
-      where: { pontuacaoMinima: dados.pontuacaoMinima },
-    });
-    if (existePontuacao) {
-      throw new BadRequestException(
-        "Já existe nível com essa pontuação mínima."
-      );
-    }
-
-    const novoNivel = await this.nivelUsuarioModel.create(dados as any);
-
-    if (!(await this.existeNivelBase())) {
-      throw new BadRequestException(
-        "Deve existir um nível base com pontuação mínima."
-      );
-    }
-
-    return novoNivel;
+  @Get()
+  @Roles("admin", "user")
+  @ApiOperation({ summary: "Listar categorias de usuario" })
+  @ApiResponse({
+    status: 200,
+    description: "Lista de nivel de usuario retornada com sucesso.",
+  })
+  @ApiQuery({
+    name: "nome",
+    required: false,
+    description: "Filtrar nivel por nome",
+  })
+  @ApiQuery({
+    name: "corIdentificacao",
+    required: false,
+    description: "Filtrar usuario por corIdentificacao",
+  })
+  @ApiQuery({
+    name: "page",
+    required: false,
+    description: "Número da página para paginação",
+  })
+  @ApiQuery({
+    name: "limit",
+    required: false,
+    description: "Limite de itens por página",
+  })
+  async listar(
+    @Query("nome") nome?: string,
+    @Query("corIdentificacao") corIdentificacao?: string,
+    @Query("page") page?: string,
+    @Query("limit") limit?: string
+  ) {
+    const filtros = {
+      nome,
+      corIdentificacao,
+      page: page ? parseInt(page, 10) : undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
+    };
+    return await this.servico.listar(filtros);
   }
 
-  async listar(filtros: {
-    nome?: string;
-    corIdentificacao?: string;
-    page?: number;
-    limit?: number;
-  }) {
-    const { nome, corIdentificacao, page = 1, limit = 10 } = filtros;
-
-    const where: any = {};
-
-    if (nome) {
-      where.nome = {
-        [Op.iLike]: `%${nome}%`,
-      };
+  @Get(":id")
+  @Roles("admin", "user")
+  @ApiOperation({ summary: "Buscar um nivel de usuario por ID" })
+  @ApiResponse({
+    status: 200,
+    description: "Nivel de usuario encontrado com sucesso.",
+  })
+  @ApiResponse({
+    status: 404,
+    description: "Nivel de usuario não encontrado.",
+  })
+  @ApiParam({
+    name: "id",
+    description: "ID do nivel de usario",
+    type: Number,
+  })
+  async buscarUm(@Param("id", ParseIntPipe) id: number) {
+    const nivel = await this.servico.buscar_um(id);
+    if (!nivel) {
+      throw new NotFoundException("Nível de usuário não encontrado.");
     }
-
-    if (corIdentificacao) {
-      where.tipo = {
-        [Op.iLike]: `%${corIdentificacao}%`,
-      };
-    }
-
-    const offset = (page - 1) * limit;
-
-    const { rows, count } = await this.nivelUsuarioModel.findAndCountAll({
-      where,
-      limit,
-      offset,
-      order: [["id", "ASC"]],
-    });
-
     return {
-      data: rows,
-      total: count,
-      page,
-      lastPage: Math.ceil(count / limit),
+      mensagem: "Nível de usuário encontrado.",
+      dados: nivel,
     };
   }
 
-  async buscar_um(id: number) {
-    const nivel = await this.nivelUsuarioModel.findOne({ where: { id } });
-    if (!nivel) throw new NotFoundException("Nível não encontrado.");
-    return nivel;
-  }
-
-  async atualizar(id: number, dados: AtualizarNivelUsuarioDto) {
-    const nivelAtual = await this.buscar_um(id);
-
-    if (dados.pontuacaoMinima !== undefined && dados.pontuacaoMinima < 0) {
-      throw new BadRequestException(
-        "A pontuacao minima não pode ser negativa."
-      );
-    }
-
-    if (
-      dados.pontuacaoMinima !== undefined &&
-      dados.pontuacaoMinima !== nivelAtual.pontuacaoMinima
-    ) {
-      const existePontuacao = await this.nivelUsuarioModel.findOne({
-        where: {
-          pontuacaoMinima: dados.pontuacaoMinima,
-          id: { [Op.ne]: id },
-        },
-      });
-      if (existePontuacao) {
-        throw new BadRequestException(
-          "Já existe nível com essa pontuação mínima."
-        );
-      }
-    }
-
-    await this.nivelUsuarioModel.update(dados, { where: { id } });
-
-    if (!(await this.existeNivelBase())) {
-      throw new BadRequestException(
-        "Deve existir um nível base com pontuação mínima."
-      );
-    }
-
-    return this.buscar_um(id);
-  }
-
-  async deletar(id: number) {
-    const usuariosComNivel = await this.usuarioModel.count({
-      where: { nivelUsuarioId: id },
-    });
-    if (usuariosComNivel > 0) {
-      throw new BadRequestException(
-        "Nível em uso por usuários, não pode ser deletado."
-      );
-    }
-
-    const deleted = await this.nivelUsuarioModel.destroy({ where: { id } });
-    if (!deleted) throw new NotFoundException("Nível não encontrado.");
-    return deleted;
-  }
-
-  async buscarNivelPorPontuacao(pontuacao: number): Promise<NivelUsuario> {
-    const nivel = await this.nivelUsuarioModel.findOne({
-      where: {
-        pontuacaoMinima: { [Op.lte]: pontuacao },
-      },
-      order: [["pontuacaoMinima", "DESC"]],
-    });
-
-    if (!nivel) {
+  @Put(":id")
+  @Roles("admin")
+  @ApiOperation({ summary: "Atualizar um nivel de usuario" })
+  @ApiResponse({
+    status: 200,
+    description: "Nivel de usuario atualizado com sucesso.",
+  })
+  @ApiResponse({
+    status: 404,
+    description: "Nivel de usuario não encontrado para atualização.",
+  })
+  @ApiParam({
+    name: "id",
+    description: "ID do nivel de usuario",
+    type: Number,
+  })
+  @ApiBody({ type: AtualizarNivelUsuarioDto })
+  async atualizar(
+    @Param("id", ParseIntPipe) id: number,
+    @Body() atualizarDto: AtualizarNivelUsuarioDto
+  ) {
+    const nivelAtualizado = await this.servico.atualizar(id, atualizarDto);
+    if (!nivelAtualizado) {
       throw new NotFoundException(
-        "Nenhum nível encontrado para a pontuação informada."
+        "Nível de usuário não encontrado para atualização."
       );
     }
+    return {
+      mensagem: "Nível de usuário atualizado com sucesso.",
+      dados: nivelAtualizado,
+    };
+  }
 
-    return nivel;
+  @Delete(":id")
+  @Roles("admin")
+  @ApiOperation({ summary: "Excluir um nivel de usuario" })
+  @ApiResponse({
+    status: 200,
+    description: "Nivel de usuario excluído com sucesso.",
+  })
+  @ApiResponse({
+    status: 404,
+    description: "Nivel de usuario encontrado para exclusão.",
+  })
+  @ApiParam({
+    name: "id",
+    description: "ID do nivel de usuario",
+    type: Number,
+  })
+  async deletar(@Param("id", ParseIntPipe) id: number) {
+    const resultado = await this.servico.deletar(id);
+    if (!resultado) {
+      throw new NotFoundException(
+        "Nível de usuário não encontrado para exclusão."
+      );
+    }
+    return { mensagem: "Nível de usuário excluído com sucesso." };
   }
 }
