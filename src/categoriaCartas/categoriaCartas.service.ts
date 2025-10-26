@@ -93,7 +93,13 @@ export class CategoriaCartasService {
       throw new NotFoundException("Categoria não encontrada.");
     }
 
-    return this.categoriaCartasModel.update(dados, { where: { id } });
+    await this.categoriaCartasModel.update(dados, { where: { id } });
+    const categoriaAtualizada = await this.categoriaCartasModel.findOne({ where: { id } });
+
+    return {
+      mensagem: "Categoria atualizada com sucesso.",
+      dados: categoriaAtualizada,
+    };
   }
 
   async deletar(id: number) {
