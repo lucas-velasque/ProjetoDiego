@@ -8,8 +8,7 @@ import { Op } from "sequelize";
 import { criarCategoriaLeilaoDto } from "./dto/criarCategoriaLeilao";
 import { atualizarCategoriaLeilaoDto } from "./dto/atualizarCategoriaLeilao";
 import { CategoriaLeilao } from "./categoriaLeilao.model";
-//erro de nome de import aqui
-import { Leilao } from "src/leiloes/entities/leilao.model";
+import { Leilao } from "../leiloes/entities/leilao.model";
 
 @Injectable()
 export class CategoriaLeilaoService {
@@ -21,6 +20,15 @@ export class CategoriaLeilaoService {
   ) {}
 
   async criar(dados: criarCategoriaLeilaoDto): Promise<CategoriaLeilao> {
+    const nomeLower = dados.nome.toLowerCase();
+
+    const palavrasProibidas = ["admin", "root", "null", "vazio", "proibido"];
+    if (palavrasProibidas.some((palavra) => nomeLower.includes(palavra))) {
+      throw new BadRequestException(
+        "O nome da categoria contém palavras não permitidas."
+      );
+    }
+
     const existente = await this.categoriaLeilaoModel.findOne({
       where: { nome: dados.nome },
     });
@@ -34,13 +42,25 @@ export class CategoriaLeilaoService {
     return this.categoriaLeilaoModel.create(dados as any);
   }
 
-  async listar(filtros: { nome?: string; page?: number; limit?: number }) {
-    const { nome, page = 1, limit = 10 } = filtros;
+  async listar(filtros: {
+    nome?: string;
+    tipo?: string;
+    page?: number;
+    limit?: number;
+  }) {
+    const { nome, tipo, page = 1, limit = 10 } = filtros;
+
     const where: any = {};
 
     if (nome) {
       where.nome = {
         [Op.iLike]: `%${nome}%`,
+      };
+    }
+
+    if (tipo) {
+      where.tipo = {
+        [Op.iLike]: `%${tipo}%`,
       };
     }
 
@@ -97,7 +117,7 @@ export class CategoriaLeilaoService {
       }
     }
 
-    if (dados.status === "inativo" && categoria.status !== "inativo") { //aqui tava com problema de tipo, precisei alterar
+    if (dados.status === "inativo" && categoria.status !== "inativo") {
       const usados = await this.leilaoModel.count({
         where: { categoriaLeilaoId: id, ativo: true },
       });
