@@ -39,26 +39,32 @@ export class CategoriaCartasService {
     return this.categoriaCartasModel.create(dados as any);
   }
 
-  async listar(filtros: { nome?: string; page?: number; limit?: number }) {
-    const { nome, page = 1, limit = 10 } = filtros;
-
+  async listar(filtros: { nome?: string; tipo?: string; page?: number; limit?: number }) {
+    const { nome, tipo, page = 1, limit = 10 } = filtros;
+  
     const where: any = {};
-
+  
     if (nome) {
       where.nome = {
         [Op.iLike]: `%${nome}%`,
       };
     }
-
+  
+    if (tipo) {
+      where.tipo = {
+        [Op.iLike]: `%${tipo}%`,
+      };
+    }
+  
     const offset = (page - 1) * limit;
-
+  
     const { rows, count } = await this.categoriaCartasModel.findAndCountAll({
       where,
       limit,
       offset,
       order: [["id", "ASC"]],
     });
-
+  
     return {
       data: rows,
       total: count,
@@ -66,6 +72,8 @@ export class CategoriaCartasService {
       lastPage: Math.ceil(count / limit),
     };
   }
+
+
 
   async buscarUm(id: number) {
     const categoria = await this.categoriaCartasModel.findOne({
