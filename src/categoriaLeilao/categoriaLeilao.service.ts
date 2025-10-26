@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  BadRequestException,
-  NotFoundException,
-} from "@nestjs/common";
+import { Injectable, BadRequestException, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { Op } from "sequelize";
 import { criarCategoriaLeilaoDto } from "./dto/criarCategoriaLeilao";
@@ -21,12 +17,10 @@ export class CategoriaLeilaoService {
 
   async criar(dados: criarCategoriaLeilaoDto): Promise<CategoriaLeilao> {
     const nomeLower = dados.nome.toLowerCase();
-
     const palavrasProibidas = ["admin", "root", "null", "vazio", "proibido"];
+
     if (palavrasProibidas.some((palavra) => nomeLower.includes(palavra))) {
-      throw new BadRequestException(
-        "O nome da categoria contém palavras não permitidas."
-      );
+      throw new BadRequestException("O nome da categoria contém palavras não permitidas.");
     }
 
     const existente = await this.categoriaLeilaoModel.findOne({
@@ -34,34 +28,22 @@ export class CategoriaLeilaoService {
     });
 
     if (existente) {
-      throw new BadRequestException(
-        "Já existe uma categoria de leilão com esse nome."
-      );
+      throw new BadRequestException("Já existe uma categoria de leilão com esse nome.");
     }
 
     return this.categoriaLeilaoModel.create(dados as any);
   }
 
-  async listar(filtros: {
-    nome?: string;
-    tipo?: string;
-    page?: number;
-    limit?: number;
-  }) {
+  async listar(filtros: { nome?: string; tipo?: string; page?: number; limit?: number }) {
     const { nome, tipo, page = 1, limit = 10 } = filtros;
-
     const where: any = {};
 
     if (nome) {
-      where.nome = {
-        [Op.iLike]: `%${nome}%`,
-      };
+      where.nome = { [Op.iLike]: `%${nome}%` };
     }
 
     if (tipo) {
-      where.tipo = {
-        [Op.iLike]: `%${tipo}%`,
-      };
+      where.tipo = { [Op.iLike]: `%${tipo}%` };
     }
 
     const offset = (page - 1) * limit;
@@ -81,24 +63,23 @@ export class CategoriaLeilaoService {
     };
   }
 
-  async buscar_um(id: number) {
-    return this.categoriaLeilaoModel.findOne({ where: { id } });
+  async buscarUm(id: number) {
+    const categoria = await this.categoriaLeilaoModel.findOne({ where: { id } });
+    if (!categoria) {
+      throw new NotFoundException("Categoria de leilão não encontrada.");
+    }
+    return categoria;
   }
 
   async atualizar(id: number, dados: atualizarCategoriaLeilaoDto) {
-    const categoria = await this.categoriaLeilaoModel.findOne({
-      where: { id },
-    });
+    const categoria = await this.categoriaLeilaoModel.findOne({ where: { id } });
     if (!categoria) {
       throw new NotFoundException("Categoria de leilão não encontrada.");
     }
 
     if (dados.nome) {
       const existente = await this.categoriaLeilaoModel.findOne({
-        where: {
-          nome: dados.nome,
-          id: { [Op.ne]: id },
-        },
+        where: { nome: dados.nome, id: { [Op.ne]: id } },
       });
       if (existente) {
         throw new BadRequestException("Já existe uma categoria com esse nome.");
@@ -109,11 +90,8 @@ export class CategoriaLeilaoService {
       const usados = await this.leilaoModel.count({
         where: { categoriaLeilaoId: id, ativo: true },
       });
-
       if (usados > 0) {
-        throw new BadRequestException(
-          "Não é possível alterar o tipo de uma categoria em uso."
-        );
+        throw new BadRequestException("Não é possível alterar o tipo de uma categoria em uso.");
       }
     }
 
@@ -121,17 +99,13 @@ export class CategoriaLeilaoService {
       const usados = await this.leilaoModel.count({
         where: { categoriaLeilaoId: id, ativo: true },
       });
-
       if (usados > 0) {
-        throw new BadRequestException(
-          "Não é possível desativar uma categoria em uso."
-        );
+        throw new BadRequestException("Não é possível desativar uma categoria em uso.");
       }
     }
 
     await this.categoriaLeilaoModel.update(dados, { where: { id } });
-
-    return this.buscar_um(id);
+    return this.buscarUm(id);
   }
 
   async deletar(id: number) {
@@ -140,20 +114,15 @@ export class CategoriaLeilaoService {
       throw new NotFoundException("Categoria de leilão não encontrada.");
     }
 
-    // Corrigido: Leilao usa 'ativo' (boolean), não 'status' (string)
-    // Corrigido: count() retorna number, não array
     const usados = await this.leilaoModel.count({
       where: { categoriaLeilaoId: id, ativo: true },
     });
 
     if (usados > 0) {
-      throw new BadRequestException(
-        "Não é possível deletar uma categoria em uso."
-      );
+      throw new BadRequestException("Não é possível deletar uma categoria em uso.");
     }
 
     await this.categoriaLeilaoModel.destroy({ where: { id } });
-
-    return { message: "Categoria deletada com sucesso." };
+    return { mensagem: "Categoria de leilão deletada com sucesso." };
   }
 }
