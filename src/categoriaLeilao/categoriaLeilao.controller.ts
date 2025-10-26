@@ -10,6 +10,7 @@ import {
   Query,
   NotFoundException,
   BadRequestException,
+  UseGuards,
 } from "@nestjs/common";
 import { CategoriaLeilaoService } from "./categoriaLeilao.service";
 import { criarCategoriaLeilaoDto } from "./dto/criarCategoriaLeilao";
@@ -86,13 +87,19 @@ export class CategoriaLeilaoController {
   @ApiOperation({
     summary: "Listar categorias de leilão",
     description:
-      "Retorna uma lista paginada de categorias de leilão com opção de filtro por nome",
+      "Retorna uma lista paginada de categorias de leilão com opção de filtro por nome e tipo",
   })
   @ApiQuery({
     name: "nome",
     required: false,
     description: "Filtrar categorias por nome",
     example: "Raras",
+  })
+  @ApiQuery({
+    name: "tipo",
+    required: false,
+    description: "Filtrar categorias por tipo",
+    example: "RARA",
   })
   @ApiQuery({
     name: "page",
@@ -131,11 +138,13 @@ export class CategoriaLeilaoController {
   })
   async listar(
     @Query("nome") nome?: string,
+    @Query("tipo") tipo?: string,
     @Query("page") page?: string,
     @Query("limit") limit?: string
   ) {
     const filtros = {
       nome,
+      tipo,
       page: page ? parseInt(page, 10) : undefined,
       limit: limit ? parseInt(limit, 10) : undefined,
     };
