@@ -1,6 +1,5 @@
 import { Table, Column, Model, DataType, HasMany } from "sequelize-typescript";
-//tava com erro de nome de import aqui também
-import { Carta } from "src/cartas/entities/carta.entity";
+import { Carta } from "../cartas/entities/carta.entity";
 
 @Table({ tableName: "categoria_cartas" })
 export class CategoriaCartas extends Model<CategoriaCartas> {
@@ -16,26 +15,26 @@ export class CategoriaCartas extends Model<CategoriaCartas> {
     allowNull: false,
     unique: true,
   })
-  nome: string;
+  nome!: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: true,
   })
-  descricao: string;
+  descricao!: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: false,
   })
-  tipo: string;
+  tipo!: string;
 
   @Column({
     type: DataType.STRING,
     allowNull: false,
   })
-  status: string;
+  status!: string;
 
   @HasMany(() => Carta)
-  cartas: Carta[];
+  cartas!: Carta[];
 }
