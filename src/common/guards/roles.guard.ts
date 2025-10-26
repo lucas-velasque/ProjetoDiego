@@ -1,7 +1,7 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { Role } from '../roles.enum';
-import { ROLES_KEY } from '../decorators/roles.decorator';
+import { Injectable, CanActivate, ExecutionContext } from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
+import { Role } from "../roles.enum";
+import { ROLES_KEY } from "../decorators/roles.decorator";
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -16,12 +16,16 @@ export class RolesGuard implements CanActivate {
     if (!requiredRoles) {
       return true;
     }
-    
+
     // O payload do JWT (incluindo a role) foi injetado no request pelo AuthGuard
     const { user } = context.switchToHttp().getRequest();
-    
+
+    if (!user) {
+      console.log("Usuario não autenticado");
+      return false;
+    }
+
     // Verifica se a role do usuário está entre as roles necessárias
     return requiredRoles.some((role) => user.role === role);
   }
 }
-
