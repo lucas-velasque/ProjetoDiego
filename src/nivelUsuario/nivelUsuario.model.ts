@@ -1,4 +1,6 @@
 import { Table, Column, Model, DataType } from "sequelize-typescript";
+import { HasMany } from "sequelize-typescript";
+import { User } from "../users/user.model";
 
 @Table({ tableName: "NivelUsuario" })
 export class NivelUsuario extends Model<NivelUsuario> {
@@ -32,4 +34,7 @@ export class NivelUsuario extends Model<NivelUsuario> {
     allowNull: true,
   })
   declare corIdentificacao?: string;
+
+  @HasMany(() => User)
+  usuario!: User[];
 }
