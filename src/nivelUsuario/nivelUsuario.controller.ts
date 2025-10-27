@@ -17,12 +17,15 @@ import { criarNivelUsuarioDto } from "./dto/criarNivelUsuario";
 import { AtualizarNivelUsuarioDto } from "./dto/atualizarNivelUsuario";
 import { RolesGuard } from "./../common/guards/roles.guard";
 import { Roles } from "./../common/decorators/roles.decorator";
+import { Role } from "./../common/roles.enum";
+import { Public } from "./../common/decorators/public.decorator";
 import {
   ApiBody,
   ApiOperation,
   ApiQuery,
   ApiResponse,
   ApiTags,
+  ApiParam,
 } from "@nestjs/swagger";
 
 @ApiTags("NivelUsuario")
@@ -32,7 +35,7 @@ export class NivelUsuarioController {
   constructor(private readonly servico: NivelUsuarioService) {}
 
   @Post()
-  @Roles("admin")
+  @Roles(Role.Admin)
   @ApiOperation({ summary: "Criar um novo nível de usuário" })
   @ApiResponse({
     status: 201,
@@ -43,6 +46,20 @@ export class NivelUsuarioController {
     description: "Erro ao criar nível de usuário.",
   })
   @ApiBody({ type: criarNivelUsuarioDto, required: true })
+  async criar(@Body() criarDto: criarNivelUsuarioDto) {
+    try {
+      const nivelCriado = await this.servico.criar(criarDto);
+      return {
+        mensagem: "Nível de usuário criado com sucesso.",
+        dados: nivelCriado,
+      };
+    } catch (error) {
+      throw new BadRequestException("Erro ao criar nível de usuário.");
+    }
+  }
+
+  @Get()
+  @Roles(Role.Admin, Role.User)
   @ApiOperation({ summary: "Listar categorias de usuario" })
   @ApiResponse({
     status: 200,
@@ -68,20 +85,6 @@ export class NivelUsuarioController {
     required: false,
     description: "Limite de itens por página",
   })
-  async criar(@Body() criarDto: criarNivelUsuarioDto) {
-    try {
-      const nivelCriado = await this.servico.criar(criarDto);
-      return {
-        mensagem: "Nível de usuário criado com sucesso.",
-        dados: nivelCriado,
-      };
-    } catch (error) {
-      throw new BadRequestException("Erro ao criar nível de usuário.");
-    }
-  }
-
-  @Get(":id")
-  @Roles("admin", "user")
   async listar(
     @Query("nome") nome?: string,
     @Query("corIdentificacao") corIdentificacao?: string,
@@ -97,8 +100,8 @@ export class NivelUsuarioController {
     return await this.servico.listar(filtros);
   }
 
-  @Public()
   @Get(":id")
+  @Public()
   @ApiOperation({ summary: "Buscar um nivel de usuario por ID" })
   @ApiResponse({
     status: 200,
@@ -125,7 +128,7 @@ export class NivelUsuarioController {
   }
 
   @Put(":id")
-  @Roles("admin")
+  @Roles(Role.Admin)
   @ApiOperation({ summary: "Atualizar um nivel de usuario" })
   @ApiResponse({
     status: 200,
@@ -158,7 +161,7 @@ export class NivelUsuarioController {
   }
 
   @Delete(":id")
-  @Roles("admin")
+  @Roles(Role.Admin)
   @ApiOperation({ summary: "Excluir um nivel de usuario" })
   @ApiResponse({
     status: 200,

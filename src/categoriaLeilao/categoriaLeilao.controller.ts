@@ -17,6 +17,7 @@ import { criarCategoriaLeilaoDto } from "./dto/criarCategoriaLeilao";
 import { atualizarCategoriaLeilaoDto } from "./dto/atualizarCategoriaLeilao";
 import { RolesGuard } from "./../common/guards/roles.guard";
 import { Roles } from "./../common/decorators/roles.decorator";
+import { Role } from "./../common/roles.enum";
 import {
   ApiTags,
   ApiOperation,
@@ -35,7 +36,7 @@ export class CategoriaLeilaoController {
   constructor(private readonly servico: CategoriaLeilaoService) {}
 
   @Post()
-  @Roles("admin")
+  @Roles(Role.Admin)
   @ApiOperation({
     summary: "Criar uma nova categoria de leilão",
     description: "Cria uma nova categoria para leilões de cartas Pokémon",
@@ -83,7 +84,7 @@ export class CategoriaLeilaoController {
   }
 
   @Get()
-  @Roles("admin", "user")
+  @Roles(Role.Admin, Role.User)
   @ApiOperation({
     summary: "Listar categorias de leilão",
     description:
@@ -152,7 +153,7 @@ export class CategoriaLeilaoController {
   }
 
   @Get(":id")
-  @Roles("admin", "user")
+  @Roles(Role.Admin, Role.User)
   @ApiOperation({
     summary: "Buscar categoria por ID",
     description: "Retorna os detalhes de uma categoria de leilão específica",
@@ -193,7 +194,7 @@ export class CategoriaLeilaoController {
     },
   })
   async buscarUm(@Param("id", ParseIntPipe) id: number) {
-    const categoria = await this.servico.buscar_um(id);
+    const categoria = await this.servico.buscarUm(id);
     if (!categoria) {
       throw new NotFoundException("Categoria de leilão não encontrada.");
     }
@@ -204,7 +205,7 @@ export class CategoriaLeilaoController {
   }
 
   @Put(":id")
-  @Roles("admin")
+  @Roles(Role.Admin)
   @ApiOperation({
     summary: "Atualizar categoria de leilão",
     description: "Atualiza os dados de uma categoria de leilão existente",
@@ -262,7 +263,7 @@ export class CategoriaLeilaoController {
   }
 
   @Delete(":id")
-  @Roles("admin")
+  @Roles(Role.Admin)
   @ApiOperation({
     summary: "Excluir categoria de leilão",
     description: "Remove uma categoria de leilão do sistema",

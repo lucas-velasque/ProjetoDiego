@@ -17,6 +17,7 @@ import { criarCategoriaCartaDto } from "./dto/criarCategoriaCarta";
 import { atualizarCategoriaCartaDto } from "./dto/atualizarCategoriaCarta";
 import { RolesGuard } from "./../common/guards/roles.guard";
 import { Roles } from "./../common/decorators/roles.decorator";
+import { Role } from "./../common/roles.enum";
 import {
   ApiTags,
   ApiOperation,
@@ -33,7 +34,7 @@ export class CategoriaCartasController {
   constructor(private readonly servico: CategoriaCartasService) {}
 
   @Post()
-  @Roles("admin")
+  @Roles(Role.Admin)
   @ApiOperation({ summary: "Criar uma nova categoria de carta" })
   @ApiResponse({
     status: 201,
@@ -57,7 +58,7 @@ export class CategoriaCartasController {
   }
 
   @Get()
-  @Roles("admin", "user")
+  @Roles(Role.Admin, Role.User)
   @ApiOperation({ summary: "Listar categorias de cartas" })
   @ApiResponse({
     status: 200,
@@ -99,7 +100,7 @@ export class CategoriaCartasController {
   }
 
   @Get(":id")
-  @Roles("admin", "user")
+  @Roles(Role.Admin, Role.User)
   @ApiOperation({ summary: "Buscar uma categoria de carta por ID" })
   @ApiResponse({
     status: 200,
@@ -126,7 +127,7 @@ export class CategoriaCartasController {
   }
 
   @Put(":id")
-  @Roles("admin")
+  @Roles(Role.Admin)
   @ApiOperation({ summary: "Atualizar uma categoria de carta" })
   @ApiResponse({
     status: 200,
@@ -159,7 +160,7 @@ export class CategoriaCartasController {
   }
 
   @Delete(":id")
-  @Roles("admin")
+  @Roles(Role.Admin)
   @ApiOperation({ summary: "Excluir uma categoria de carta" })
   @ApiResponse({
     status: 200,
