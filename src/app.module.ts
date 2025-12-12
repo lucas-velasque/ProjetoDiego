@@ -9,12 +9,13 @@ import { ComentariosModule } from "./comentarios/comentarios.module";
 import { AnunciosVendaModule } from "./anunciosVenda/anuncioVenda.module";
 import { databaseConfig } from "./database/database.config";
 import { AnunciosCompraModule } from "./anunciosCompra/anuncioCompra.module";
+import { PropostasModule } from "./propostas/propostas.module";
+import { CategoriaCartasModule } from "./categoriaCartas/categoriaCartas.module";
+import { CategoriaLeilaoModule } from "./categoriaLeilao/categoriaLeilao.module";
+import { NivelUsuarioModule } from "./nivelUsuario/nivelUsuario.module";
 import { ConfigModule } from "@nestjs/config";
 import { LeiloesModule } from "./leiloes/leiloes.module";
-import { CategoriaCartasModule } from "./categoriaCartas/categoriaCartas.module";
-import { CategoriaLeilaoModule } from "./categoria-leilao/categoriaLeilao.module";
-import { NivelUsuarioModule } from "./nivel-usuario/nivelUsuario.module";
-
+import { CarrinhoModule } from "./carrinho/carrinho.module";
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -25,11 +26,12 @@ import { NivelUsuarioModule } from "./nivel-usuario/nivelUsuario.module";
     ComentariosModule,
     AnunciosVendaModule,
     AnunciosCompraModule,
-    NivelUsuarioModule,
+    PropostasModule,
     CategoriaCartasModule,
     CategoriaLeilaoModule,
+    NivelUsuarioModule,
     LeiloesModule,
-    NivelUsuarioModule, //test
+    CarrinhoModule,
   ],
   controllers: [AppController],
   providers: [AppService],

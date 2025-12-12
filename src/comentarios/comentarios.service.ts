@@ -1,11 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+<<<<<<< HEAD
 import { Op } from 'sequelize';
 import { Comentario } from './entities/comentario.entity';
 import { CreateComentarioDto } from './dto/create-comentario.dto';
 import { UpdateComentarioDto } from './dto/update-comentario.dto';
 import { FiltroComentarioDto } from './dto/filtro-comentario.dto';
 import { User } from '../users/entities/user.entity';
+=======
+import { CreateComentarioDto } from './dto/create-comentario.dto';
+import { UpdateComentarioDto } from './dto/update-comentario.dto';
+import { Comentario } from './entities/comentario.entity';
+>>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
 
 @Injectable()
 export class ComentariosService {
@@ -14,6 +20,7 @@ export class ComentariosService {
     private comentarioModel: typeof Comentario,
   ) {}
 
+<<<<<<< HEAD
   async create(createComentarioDto: CreateComentarioDto): Promise<Comentario> {
     const comentario = await this.comentarioModel.create(createComentarioDto as any);
     return await this.findOne(comentario.id);
@@ -140,5 +147,47 @@ export class ComentariosService {
     await comentario.update({ status: 'deletado' });
 
     return { message: 'Comentário removido com sucesso' };
+=======
+  async create(createComentarioDto: CreateComentarioDto, usuarioId: number): Promise<Comentario> {
+    // Adiciona o usuarioId extraído do JWT ao objeto de criação
+    return this.comentarioModel.create({
+      ...createComentarioDto,
+      usuarioId
+    } as any);
+  }
+
+  async findAll(): Promise<Comentario[]> {
+    return this.comentarioModel.findAll();
+  }
+
+  async findOne(id: number): Promise<Comentario> {
+    const comentario = await this.comentarioModel.findByPk(id);
+    if (!comentario) {
+      throw new NotFoundException(`Comentário com ID ${id} não encontrado.`);
+    }
+    return comentario;
+  }
+
+  async update(id: number, updateComentarioDto: UpdateComentarioDto): Promise<Comentario> {
+    const [numberOfAffectedRows, [updatedComentario]] = await this.comentarioModel.update(
+      { ...updateComentarioDto },
+      { where: { id }, returning: true },
+    );
+
+    if (numberOfAffectedRows === 0) {
+      throw new NotFoundException(`Comentário com ID ${id} não encontrado.`);
+    }
+
+    return updatedComentario;
+  }
+
+  async remove(id: number): Promise<void> {
+    const numberOfDeletedRows = await this.comentarioModel.destroy({ where: { id } });
+
+    if (numberOfDeletedRows === 0) {
+      throw new NotFoundException(`Comentário com ID ${id} não encontrado.`);
+    }
+>>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
   }
 }
+

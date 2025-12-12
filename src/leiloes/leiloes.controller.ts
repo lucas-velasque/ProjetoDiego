@@ -16,13 +16,19 @@ import {
 import { LeiloesService } from "./leiloes.service";
 import { CriarLeilaoDto } from "./dto/criar-leilao.dto";
 import { AtualizarLeilaoDto } from "./dto/atualizar-leilao.dto";
+<<<<<<< HEAD
 import { FiltroLeilaoDto } from "./dto/filtro-leilao.dto";
+=======
+import { CriarLanceDto } from "./dto/criar-lance.dto";
+import { ListarLeiloesDto } from "./dto/listar-leiloes.dto";
+>>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
 import { Public } from "src/common/decorators/public.decorator";
 
+@Public()
 @Controller("leiloes")
 export class LeiloesController {
   constructor(private readonly service: LeiloesService) {}
-  @Public()
+
   @Post()
   async criar(@Body() dto: CriarLeilaoDto) {
     try {
@@ -33,21 +39,25 @@ export class LeiloesController {
       throw new InternalServerErrorException("Falha ao criar leilão.");
     }
   }
-  @Public()
+
   @Get()
+<<<<<<< HEAD
   async listar(@Query() filtros: FiltroLeilaoDto) {
+=======
+  @Get()
+  async listar(@Query() query: ListarLeiloesDto) {
+>>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
     try {
       const result = await this.service.listar(filtros);
       return {
         message: "Leilões listados com sucesso.",
         ...result,
       };
-    } catch (err) {
-      if (err instanceof HttpException) throw err;
+    } catch {
       throw new InternalServerErrorException("Falha ao listar leilões.");
     }
   }
-  @Public()
+
   @Get(":id")
   async visualizar(@Param("id", ParseIntPipe) id: number) {
     try {
@@ -59,7 +69,7 @@ export class LeiloesController {
       throw new InternalServerErrorException("Falha ao buscar leilão.");
     }
   }
-  @Public()
+
   @Patch(":id")
   async atualizar(
     @Param("id", ParseIntPipe) id: number,
@@ -72,11 +82,8 @@ export class LeiloesController {
         : typeof result === "number"
           ? result
           : 0;
-
       if (!affected)
         throw new NotFoundException("Leilão não encontrado para atualização.");
-
-      // Opcional: retornar o registro atualizado
       const data = await this.service.visualizar(id);
       return { message: "Leilão atualizado com sucesso.", data };
     } catch (err) {
@@ -84,7 +91,7 @@ export class LeiloesController {
       throw new InternalServerErrorException("Falha ao atualizar leilão.");
     }
   }
-  @Public()
+
   @Delete(":id")
   async deletar(@Param("id", ParseIntPipe) id: number) {
     try {
@@ -95,6 +102,68 @@ export class LeiloesController {
     } catch (err) {
       if (err instanceof HttpException) throw err;
       throw new InternalServerErrorException("Falha ao remover leilão.");
+    }
+  }
+
+  // Dar lance
+  @Post(":id/lances")
+  async darLance(
+    @Param("id", ParseIntPipe) leilaoId: number,
+    @Body() dto: CriarLanceDto,
+  ) {
+    try {
+      if (dto.id_usuario == null) {
+        return {
+          message: "Informe o id do usuário (id_usuario) e o valor do lance.",
+        };
+      }
+      const resp = await this.service.darLance(
+        dto.id_usuario,
+        leilaoId,
+        dto.valor,
+      );
+      return { message: "Lance registrado com sucesso.", ...resp };
+    } catch (err) {
+      if (err instanceof HttpException) throw err;
+      throw new InternalServerErrorException("Falha ao dar lance.");
+    }
+  }
+
+  // Encerrar leilão manualmente
+  @Patch(":id/encerrar")
+  async encerrar(@Param("id", ParseIntPipe) id: number) {
+    try {
+      const data = await this.service.encerrarManual(id);
+      return { message: "Leilão encerrado manualmente.", data };
+    } catch (err) {
+      if (err instanceof HttpException) throw err;
+      throw new InternalServerErrorException("Falha ao encerrar leilão.");
+    }
+  }
+
+  // Leilões vencidos por mim (público: passar usuarioId na query)
+  @Get("me/vencidos")
+  async vencidosPorMim(@Query("usuarioId", ParseIntPipe) usuarioId: number) {
+    try {
+      const data = await this.service.leiloesVencidosPor(usuarioId);
+      return { message: "Leilões vencidos recuperados com sucesso.", data };
+    } catch {
+      throw new InternalServerErrorException(
+        "Falha ao consultar leilões vencidos.",
+      );
+    }
+  }
+
+  // Meus leilões ativos (público: passar usuarioId na query)
+  @Get("me/ativos")
+  async meusAtivos(@Query("usuarioId", ParseIntPipe) usuarioId: number) {
+    try {
+      const data = await this.service.meusLeiloesAtivos(usuarioId);
+      return { message: "Leilões ativos recuperados com sucesso.", data };
+    } catch {
+      throw new InternalServerErrorException(
+        "Falha ao consultar leilões ativos.",
+      );
     }
   }
 }

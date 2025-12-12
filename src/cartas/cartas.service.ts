@@ -4,8 +4,13 @@ import { Op } from 'sequelize';
 import { Carta } from './entities/carta.entity';
 import { CreateCartaDto } from './dto/create-carta.dto';
 import { UpdateCartaDto } from './dto/update-carta.dto';
+<<<<<<< HEAD
 import { FiltroCartaDto } from './dto/filtro-carta.dto';
 import { CategoriaCartas } from '../categoriaCartas/categoriaCartas.model';
+=======
+import { FilterCartaDto } from './dto/filter-carta.dto';
+import { PaginatedCartasDto } from './dto/paginated-response.dto';
+>>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
 
 @Injectable()
 export class CartasService {
@@ -15,6 +20,7 @@ export class CartasService {
   ) {}
 
   async create(createCartaDto: CreateCartaDto): Promise<Carta> {
+<<<<<<< HEAD
     const carta = await this.cartaModel.create(createCartaDto as any);
     return await this.findOne(carta.id);
   }
@@ -120,11 +126,68 @@ export class CartasService {
         page,
         limit,
         totalPages: Math.ceil(count / limit),
+=======
+    return this.cartaModel.create(createCartaDto as any);
+  }
+
+  async findAll(filterDto: FilterCartaDto): Promise<PaginatedCartasDto> {
+    const { page = 1, limit = 10, orderBy = 'id', order = 'ASC', ...filters } = filterDto;
+    
+    const offset = (page - 1) * limit;
+    
+    // Construir filtros dinâmicos
+    const where: any = {};
+    
+    if (filters.nome) {
+      where.nome = { [Op.iLike]: `%${filters.nome}%` };
+    }
+    
+    if (filters.tipo) {
+      where.tipo = { [Op.iLike]: `%${filters.tipo}%` };
+    }
+    
+    if (filters.categoria) {
+      where.categoria = { [Op.iLike]: `%${filters.categoria}%` };
+    }
+    
+    if (filters.raridade) {
+      where.raridade = { [Op.iLike]: `%${filters.raridade}%` };
+    }
+    
+    if (filters.simboloExpansao) {
+      where.simboloExpansao = { [Op.iLike]: `%${filters.simboloExpansao}%` };
+    }
+    
+    if (filters.ilustrador) {
+      where.ilustrador = { [Op.iLike]: `%${filters.ilustrador}%` };
+    }
+
+    // Buscar cartas com filtros e paginação
+    const { rows: data, count: totalItems } = await this.cartaModel.findAndCountAll({
+      where,
+      limit,
+      offset,
+      order: [[orderBy, order]],
+    });
+
+    const totalPages = Math.ceil(totalItems / limit);
+
+    return {
+      data,
+      meta: {
+        currentPage: page,
+        itemsPerPage: limit,
+        totalItems,
+        totalPages,
+        hasPreviousPage: page > 1,
+        hasNextPage: page < totalPages,
+>>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
       },
     };
   }
 
   async findOne(id: number): Promise<Carta> {
+<<<<<<< HEAD
     const carta = await this.cartaModel.findByPk(id, {
       include: [
         {
@@ -139,10 +202,15 @@ export class CartasService {
       throw new NotFoundException(`Carta com ID ${id} não encontrada`);
     }
 
+=======
+    const carta = await this.cartaModel.findByPk(id);
+    if (!carta) throw new NotFoundException('Carta não encontrada');
+>>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
     return carta;
   }
 
   async update(id: number, updateCartaDto: UpdateCartaDto): Promise<Carta> {
+<<<<<<< HEAD
     const carta = await this.cartaModel.findByPk(id);
 
     if (!carta) {
@@ -164,5 +232,14 @@ export class CartasService {
     await carta.destroy();
 
     return { message: 'Carta removida com sucesso' };
+=======
+    const carta = await this.findOne(id);
+    return carta.update(updateCartaDto);
+  }
+
+  async remove(id: number): Promise<void> {
+    const carta = await this.findOne(id);
+    await carta.destroy();
+>>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
   }
 }

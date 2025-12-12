@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import {
   Table,
   Column,
@@ -15,20 +16,22 @@ import { CategoriaCartas } from '../../categoriaCartas/categoriaCartas.model';
   timestamps: true,
 })
 export class Carta extends Model {
-  @Column({
-    type: DataType.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
-  })
-  declare id: number;
+=======
+import { Column, DataType, Model, Table, ForeignKey, BelongsTo, HasMany } from 'sequelize-typescript';
+import { CategoriaCartas } from 'src/categoriaCartas/categoriaCartas.model';
+import { AnuncioVendaCarta } from 'src/anunciosVenda/entities/anuncioVendaCarta.entity';
 
+@Table({ tableName: 'cartas' })
+export class Carta extends Model<Carta> {
+>>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
   @Column({
-    type: DataType.STRING(255),
+    type: DataType.STRING,
     allowNull: false,
   })
-  declare nome: string;
+  nome: string;
 
   @Column({
+<<<<<<< HEAD
     type: DataType.TEXT,
     allowNull: true,
   })
@@ -52,13 +55,97 @@ export class Carta extends Model {
     allowNull: true,
   })
   declare categoria_id: number;
+=======
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  tipo: string;
 
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+  })
+  pontosSaude: number;
+>>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
+
+  @Column({
+    type: DataType.STRING,
+  })
+  categoria: string;
+
+  @Column({
+    type: DataType.TEXT,
+  })
+  descricaoPokedex: string;
+
+  @Column({
+    type: DataType.INTEGER,
+  })
+  danoCausado: number;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  ataque: string;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  custoAtaque: string;
+
+  @Column({
+    type: DataType.TEXT,
+  })
+  efeitosAtaque: string;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  ilustrador: string;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  simboloExpansao: string;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  numeroExpansao: string;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  raridade: string;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  fraqueza: string;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  resistencia: string;
+
+  @Column({
+    type: DataType.STRING,
+  })
+  custoRecuo: string;
+
+  @Column({
+    type: DataType.TEXT,
+  })
+  descricaoNaPokedex: string;
+
+  @ForeignKey(() => CategoriaCartas)
   @Column({
     type: DataType.INTEGER,
     allowNull: true,
   })
-  declare pontos_saude: number;
+  categoriaId: number;
 
+<<<<<<< HEAD
   @Column({
     type: DataType.INTEGER,
     allowNull: true,
@@ -104,4 +191,14 @@ export class Carta extends Model {
   // Relacionamento com categoria
   @BelongsTo(() => CategoriaCartas)
   declare categoria: CategoriaCartas;
+=======
+  @BelongsTo(() => CategoriaCartas)
+  categoria_relacionamento: CategoriaCartas;
+
+  @HasMany(() => AnuncioVendaCarta, {
+    foreignKey: 'carta_id',
+    as: 'anunciosVenda',
+  })
+  anunciosVenda: AnuncioVendaCarta[];
+>>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
 }

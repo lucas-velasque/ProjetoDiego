@@ -1,4 +1,8 @@
-import { Injectable } from "@nestjs/common";
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { Op } from "sequelize";
 import { CategoriaCartas } from "./categoriaCartas.model";
@@ -13,29 +17,54 @@ export class CategoriaCartasService {
   ) {}
 
   async criar(dados: criarCategoriaCartaDto): Promise<CategoriaCartas> {
+    const nomeLower = dados.nome.toLowerCase();
+
+    const palavrasProibidas = ["admin", "root", "null", "vazio", "proibido"];
+    if (palavrasProibidas.some((palavra) => nomeLower.includes(palavra))) {
+      throw new BadRequestException(
+        "O nome da categoria contém palavras não permitidas."
+      );
+    }
+
+    const categoriaExistente = await this.categoriaCartasModel.findOne({
+      where: {
+        nome: { [Op.iLike]: dados.nome },
+      },
+    });
+
+    if (categoriaExistente) {
+      throw new BadRequestException("Já existe uma categoria com esse nome.");
+    }
+
     return this.categoriaCartasModel.create(dados as any);
   }
 
-  async listar(filtros: { nome?: string; page?: number; limit?: number }) {
-    const { nome, page = 1, limit = 10 } = filtros;
-
+  async listar(filtros: { nome?: string; tipo?: string; page?: number; limit?: number }) {
+    const { nome, tipo, page = 1, limit = 10 } = filtros;
+  
     const where: any = {};
-
+  
     if (nome) {
       where.nome = {
         [Op.iLike]: `%${nome}%`,
       };
     }
-
+  
+    if (tipo) {
+      where.tipo = {
+        [Op.iLike]: `%${tipo}%`,
+      };
+    }
+  
     const offset = (page - 1) * limit;
-
+  
     const { rows, count } = await this.categoriaCartasModel.findAndCountAll({
       where,
       limit,
       offset,
       order: [["id", "ASC"]],
     });
-
+  
     return {
       data: rows,
       total: count,
@@ -44,15 +73,53 @@ export class CategoriaCartasService {
     };
   }
 
+
+
   async buscarUm(id: number) {
-    return this.categoriaCartasModel.findOne({ where: { id } });
+    const categoria = await this.categoriaCartasModel.findOne({
+      where: { id },
+    });
+    if (!categoria) {
+      throw new NotFoundException("Categoria não encontrada.");
+    }
+    return categoria;
   }
 
   async atualizar(id: number, dados: atualizarCategoriaCartaDto) {
-    return this.categoriaCartasModel.update(dados, { where: { id } });
+    const categoria = await this.categoriaCartasModel.findOne({
+      where: { id },
+    });
+    if (!categoria) {
+      throw new NotFoundException("Categoria não encontrada.");
+    }
+
+    await this.categoriaCartasModel.update(dados, { where: { id } });
+    const categoriaAtualizada = await this.categoriaCartasModel.findOne({ where: { id } });
+
+    return {
+      mensagem: "Categoria atualizada com sucesso.",
+      dados: categoriaAtualizada,
+    };
   }
 
   async deletar(id: number) {
-    return this.categoriaCartasModel.destroy({ where: { id } });
+    const categoria = await this.categoriaCartasModel.findOne({
+      where: { id },
+      include: ["cartas"],
+    });
+
+    if (!categoria) {
+      throw new NotFoundException("Categoria não encontrada.");
+    }
+
+    if (categoria.cartas && categoria.cartas.length > 0) {
+      throw new BadRequestException(
+        "Não é possível deletar uma categoria que está em uso."
+      );
+    }
+
+    await this.categoriaCartasModel.destroy({ where: { id } });
+
+    return { message: "Categoria deletada com sucesso" };
   }
 }

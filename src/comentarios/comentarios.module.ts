@@ -11,3 +11,4 @@ import { Comentario } from './entities/comentario.entity';
   exports: [ComentariosService],
 })
 export class ComentariosModule {}
+

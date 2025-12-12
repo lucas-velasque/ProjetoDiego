@@ -1,3 +1,4 @@
+// src/leiloes/leiloes.service.ts
 import {
   Injectable,
   ForbiddenException,
@@ -7,10 +8,14 @@ import {
 import { InjectModel } from "@nestjs/sequelize";
 import { Leilao } from "./entities/leilao.model";
 import { Lance } from "./entities/lance.model";
-import { Op } from "sequelize";
+import { Op, WhereOptions } from "sequelize";
 import { CriarLeilaoDto } from "./dto/criar-leilao.dto";
 import { AtualizarLeilaoDto } from "./dto/atualizar-leilao.dto";
+<<<<<<< HEAD
 import { FiltroLeilaoDto } from "./dto/filtro-leilao.dto";
+=======
+import { ListarLeiloesDto } from "./dto/listar-leiloes.dto";
+>>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
 
 @Injectable()
 export class LeiloesService {
@@ -23,6 +28,7 @@ export class LeiloesService {
     return this.leiloes.create(dados as any);
   }
 
+<<<<<<< HEAD
   async listar(filtros: FiltroLeilaoDto = {}) {
     const { page = 1, limit = 10, ...filters } = filtros;
 
@@ -33,7 +39,30 @@ export class LeiloesService {
       where.titulo = {
         [Op.iLike]: `%${filters.titulo}%`,
       };
+=======
+  async listar({
+    titulo,
+    page = 1,
+    limit = 10,
+    status,
+    usuarioId,
+    ganhadorId,
+  }: ListarLeiloesDto) {
+    const where: WhereOptions<Leilao> & {
+      id_usuario?: number;
+      ganhadorId?: number;
+    } = {};
+
+    if (titulo) {
+      where.titulo = { [Op.iLike]: `%${titulo}%` };
+>>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
     }
+    if (status && (status === "aberto" || status === "encerrado")) {
+      where.status = status as Leilao["status"];
+    }
+    if (usuarioId != null) where.id_usuario = usuarioId;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    if (ganhadorId != null) where.ganhadorId = ganhadorId;
 
     // Filtro por status
     if (filters.status) {
@@ -82,19 +111,25 @@ export class LeiloesService {
 
     const { rows, count } = await this.leiloes.findAndCountAll({
       where,
-      limit,
+      limit: Number(limit),
       offset,
       order: [["created_at", "DESC"]],
     });
 
     return {
       data: rows,
+<<<<<<< HEAD
       meta: {
         total: count,
         page,
         limit,
         totalPages: Math.ceil(count / limit),
       },
+=======
+      total: count,
+      page: Number(page),
+      lastPage: Math.ceil(count / limit),
+>>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
     };
   }
 
@@ -112,6 +147,7 @@ export class LeiloesService {
   }
 
   async atualizar(id: number, dados: AtualizarLeilaoDto) {
+<<<<<<< HEAD
     const leilao = await this.leiloes.findByPk(id);
 
     if (!leilao) {
@@ -131,5 +167,97 @@ export class LeiloesService {
 
     await this.leiloes.destroy({ where: { id } });
     return { message: 'Leilão removido com sucesso' };
+=======
+    return this.leiloes.update(dados as any, { where: { id } });
+  }
+
+  async deletar(id: number) {
+    return this.leiloes.destroy({ where: { id } });
+  }
+  async darLance(id_usuario: number, id_leilao: number, valor: number) {
+    const leilao = await this.leiloes.findOne({ where: { id: id_leilao } });
+    if (!leilao) throw new NotFoundException("Leilão não encontrado");
+
+    const agora = new Date();
+    if (
+      !leilao.ativo ||
+      (leilao.terminaEm && new Date(leilao.terminaEm) < agora)
+    ) {
+      throw new BadRequestException("Leilão não está ativo");
+    }
+
+    if (leilao.id_usuario === id_usuario) {
+      throw new ForbiddenException("Vendedor não pode dar lance");
+    }
+
+    const atual = Number(leilao.precoAtual ?? 0);
+    const incremento = Number(leilao.valor_incremento ?? 0);
+    const minimo = atual + incremento;
+
+    if (Number(valor) <= atual || (incremento > 0 && Number(valor) < minimo)) {
+      throw new BadRequestException(`Lance mínimo: ${minimo.toFixed(2)}`);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    await this.lances.create({
+      id_leilao: id_leilao.toString(),
+      id_usuario,
+      valor: Number(valor),
+    } as any);
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    await leilao.update({ precoAtual: Number(valor) } as any);
+
+    return { ok: true, precoAtual: Number(valor) };
+  }
+
+  // 2) Encerrar manualmente
+  async encerrarManual(id: number) {
+    const leilao = await this.leiloes.findByPk(id);
+    if (!leilao) throw new NotFoundException("Leilão não encontrado");
+
+    if (leilao.status && leilao.status === "encerrado") {
+      return leilao; // já encerrado
+    }
+
+    // pega maior lance (se existir)
+    const maiorLance = await this.lances.findOne({
+      where: { id_leilao: id },
+      order: [["valor", "DESC"]],
+    });
+
+    const updatePayload: Partial<Leilao> = {
+      status: "encerrado",
+      ativo: false,
+      terminaEm: new Date(),
+      precoAtual: maiorLance
+        ? Number(maiorLance.valor)
+        : (leilao.precoAtual ?? 0),
+    };
+
+    if (maiorLance) {
+      updatePayload.ganhadorId = maiorLance.id_usuario;
+    }
+
+    await leilao.update(updatePayload);
+    return leilao;
+  }
+
+  async leiloesVencidosPor(usuarioId: number) {
+    return this.leiloes.findAll({
+      where: {
+        status: "encerrado",
+        ganhadorId: usuarioId,
+      } satisfies Partial<Leilao>,
+      order: [["id", "DESC"]],
+    });
+  }
+
+  async meusLeiloesAtivos(usuarioId: number) {
+    return this.leiloes.findAll({
+      where: { id_usuario: usuarioId, ativo: true },
+      order: [["id", "DESC"]],
+    });
+>>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
   }
 }
