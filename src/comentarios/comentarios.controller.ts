@@ -1,34 +1,63 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ComentariosService } from './comentarios.service';
 import { CreateComentarioDto } from './dto/create-comentario.dto';
 import { UpdateComentarioDto } from './dto/update-comentario.dto';
+import { FiltroComentarioDto } from './dto/filtro-comentario.dto';
+import { Public } from '../common/decorators/public.decorator';
 
 @Controller('comentarios')
 export class ComentariosController {
   constructor(private readonly comentariosService: ComentariosService) {}
 
+  @Public()
   @Post()
   create(@Body() createComentarioDto: CreateComentarioDto) {
     return this.comentariosService.create(createComentarioDto);
   }
 
+  @Public()
   @Get()
-  findAll() {
-    return this.comentariosService.findAll();
+  findAll(@Query() filtros: FiltroComentarioDto) {
+    return this.comentariosService.findAll(filtros);
   }
 
+  @Public()
+  @Get('entity/:entityType/:entityId')
+  findByEntity(
+    @Param('entityType') entityType: string,
+    @Param('entityId', ParseIntPipe) entityId: number,
+  ) {
+    return this.comentariosService.findByEntity(entityId, entityType);
+  }
+
+  @Public()
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.comentariosService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.comentariosService.findOne(id);
   }
 
+  @Public()
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateComentarioDto: UpdateComentarioDto) {
-    return this.comentariosService.update(+id, updateComentarioDto);
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateComentarioDto: UpdateComentarioDto,
+  ) {
+    return this.comentariosService.update(id, updateComentarioDto);
   }
 
+  @Public()
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.comentariosService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.comentariosService.remove(id);
   }
 }

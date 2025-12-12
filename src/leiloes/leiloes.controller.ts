@@ -16,6 +16,7 @@ import {
 import { LeiloesService } from "./leiloes.service";
 import { CriarLeilaoDto } from "./dto/criar-leilao.dto";
 import { AtualizarLeilaoDto } from "./dto/atualizar-leilao.dto";
+import { FiltroLeilaoDto } from "./dto/filtro-leilao.dto";
 import { Public } from "src/common/decorators/public.decorator";
 
 @Controller("leiloes")
@@ -34,20 +35,12 @@ export class LeiloesController {
   }
   @Public()
   @Get()
-  async listar(
-    @Query()
-    query: {
-      titulo?: string;
-      page?: number;
-      limit?: number;
-    },
-  ) {
+  async listar(@Query() filtros: FiltroLeilaoDto) {
     try {
-      const { data, total, page, lastPage } = await this.service.listar(query);
+      const result = await this.service.listar(filtros);
       return {
         message: "Leilões listados com sucesso.",
-        data,
-        meta: { total, page, lastPage },
+        ...result,
       };
     } catch (err) {
       if (err instanceof HttpException) throw err;

@@ -1,4 +1,3 @@
-
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
@@ -7,20 +6,60 @@ import { JwtService } from '@nestjs/jwt';
 export class AuthService {
   constructor(
     private usersService: UsersService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
   ) {}
 
   async signIn(
     username: string,
-    pass: string,
-  ): Promise<{ access_token: string }> {
-    const user = await this.usersService.findOne(username);
-    if (user?.password !== pass) {
-      throw new UnauthorizedException();
+    password: string,
+  ): Promise<{ access_token: string; user: any }> {
+    // Buscar usuário por username
+    const user = await this.usersService.findOneByUsername(username);
+
+    if (!user) {
+      throw new UnauthorizedException('Credenciais inválidas');
     }
-    const payload = { sub: user.userId, username: user.username };
+
+    // Verificar se usuário está ativo
+    if (user.status !== 'ativo') {
+      throw new UnauthorizedException('Usuário inativo ou bloqueado');
+    }
+
+    // Validar senha usando bcrypt
+    const isPasswordValid = await this.usersService.validatePassword(
+      password,
+      user.senha,
+    );
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Credenciais inválidas');
+    }
+
+    // Criar payload do JWT
+    const payload = {
+      sub: user.id,
+      username: user.username,
+      email: user.email,
+      nivel_usuario_id: user.nivel_usuario_id,
+    };
+
+    // Retornar token e dados do usuário (sem senha)
     return {
       access_token: await this.jwtService.signAsync(payload),
+      user: {
+        id: user.id,
+        nome: user.nome,
+        username: user.username,
+        email: user.email,
+        nivel_usuario_id: user.nivel_usuario_id,
+        pontuacao: user.pontuacao,
+        status: user.status,
+        nivelUsuario: user.nivelUsuario,
+      },
     };
+  }
+
+  async validateUser(userId: number) {
+    return await this.usersService.findOne(userId);
   }
 }

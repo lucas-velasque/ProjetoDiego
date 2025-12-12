@@ -1,26 +1,144 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { Op } from 'sequelize';
+import { Comentario } from './entities/comentario.entity';
 import { CreateComentarioDto } from './dto/create-comentario.dto';
 import { UpdateComentarioDto } from './dto/update-comentario.dto';
+import { FiltroComentarioDto } from './dto/filtro-comentario.dto';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class ComentariosService {
-  create(createComentarioDto: CreateComentarioDto) {
-    return 'This action adds a new comentario';
+  constructor(
+    @InjectModel(Comentario)
+    private comentarioModel: typeof Comentario,
+  ) {}
+
+  async create(createComentarioDto: CreateComentarioDto): Promise<Comentario> {
+    const comentario = await this.comentarioModel.create(createComentarioDto as any);
+    return await this.findOne(comentario.id);
   }
 
-  findAll() {
-    return `This action returns all comentarios`;
+  async findAll(filtros: FiltroComentarioDto = {}) {
+    const { page = 1, limit = 10, ...filters } = filtros;
+    const offset = (page - 1) * limit;
+
+    const whereClause: any = { status: 'ativo' }; // Por padrão, só retorna comentários ativos
+
+    // Filtro por usuário
+    if (filters.usuario_id) {
+      whereClause.usuario_id = filters.usuario_id;
+    }
+
+    // Filtro por entidade
+    if (filters.entity_id) {
+      whereClause.entity_id = filters.entity_id;
+    }
+
+    // Filtro por tipo de entidade
+    if (filters.entity_type) {
+      whereClause.entity_type = filters.entity_type;
+    }
+
+    // Filtro por status
+    if (filters.status) {
+      whereClause.status = filters.status;
+    }
+
+    // Filtro por data
+    if (filters.data_inicio || filters.data_fim) {
+      whereClause.created_at = {};
+      if (filters.data_inicio) {
+        whereClause.created_at[Op.gte] = new Date(filters.data_inicio);
+      }
+      if (filters.data_fim) {
+        whereClause.created_at[Op.lte] = new Date(filters.data_fim);
+      }
+    }
+
+    const { count, rows } = await this.comentarioModel.findAndCountAll({
+      where: whereClause,
+      include: [
+        {
+          model: User,
+          as: 'usuario',
+          attributes: ['id', 'nome', 'username'],
+        },
+      ],
+      limit,
+      offset,
+      order: [['created_at', 'DESC']],
+    });
+
+    return {
+      data: rows,
+      meta: {
+        total: count,
+        page,
+        limit,
+        totalPages: Math.ceil(count / limit),
+      },
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} comentario`;
+  async findOne(id: number): Promise<Comentario> {
+    const comentario = await this.comentarioModel.findByPk(id, {
+      include: [
+        {
+          model: User,
+          as: 'usuario',
+          attributes: ['id', 'nome', 'username'],
+        },
+      ],
+    });
+
+    if (!comentario) {
+      throw new NotFoundException(`Comentário com ID ${id} não encontrado`);
+    }
+
+    return comentario;
   }
 
-  update(id: number, updateComentarioDto: UpdateComentarioDto) {
-    return `This action updates a #${id} comentario`;
+  async findByEntity(entityId: number, entityType: string) {
+    return await this.comentarioModel.findAll({
+      where: {
+        entity_id: entityId,
+        entity_type: entityType,
+        status: 'ativo',
+      },
+      include: [
+        {
+          model: User,
+          as: 'usuario',
+          attributes: ['id', 'nome', 'username'],
+        },
+      ],
+      order: [['created_at', 'DESC']],
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} comentario`;
+  async update(id: number, updateComentarioDto: UpdateComentarioDto): Promise<Comentario> {
+    const comentario = await this.comentarioModel.findByPk(id);
+
+    if (!comentario) {
+      throw new NotFoundException(`Comentário com ID ${id} não encontrado`);
+    }
+
+    await comentario.update(updateComentarioDto);
+
+    return await this.findOne(id);
+  }
+
+  async remove(id: number): Promise<{ message: string }> {
+    const comentario = await this.comentarioModel.findByPk(id);
+
+    if (!comentario) {
+      throw new NotFoundException(`Comentário com ID ${id} não encontrado`);
+    }
+
+    // Soft delete
+    await comentario.update({ status: 'deletado' });
+
+    return { message: 'Comentário removido com sucesso' };
   }
 }

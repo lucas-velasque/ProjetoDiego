@@ -10,6 +10,7 @@ import { Lance } from "./entities/lance.model";
 import { Op } from "sequelize";
 import { CriarLeilaoDto } from "./dto/criar-leilao.dto";
 import { AtualizarLeilaoDto } from "./dto/atualizar-leilao.dto";
+import { FiltroLeilaoDto } from "./dto/filtro-leilao.dto";
 
 @Injectable()
 export class LeiloesService {
@@ -22,49 +23,113 @@ export class LeiloesService {
     return this.leiloes.create(dados as any);
   }
 
-  async listar(filtros: { titulo?: string; page?: number; limit?: number }) {
-    const { titulo, page = 1, limit = 10 } = filtros;
+  async listar(filtros: FiltroLeilaoDto = {}) {
+    const { page = 1, limit = 10, ...filters } = filtros;
 
     const where: any = {};
 
-    if (titulo) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    // Filtro por título
+    if (filters.titulo) {
       where.titulo = {
-        [Op.iLike]: "%${titulo}%",
+        [Op.iLike]: `%${filters.titulo}%`,
       };
+    }
+
+    // Filtro por status
+    if (filters.status) {
+      where.status = filters.status;
+    }
+
+    // Filtro por categoria
+    if (filters.categoria_id) {
+      where.categoria_id = filters.categoria_id;
+    }
+
+    // Filtro por lance inicial (range)
+    if (filters.lance_inicial_min !== undefined || filters.lance_inicial_max !== undefined) {
+      where.lance_inicial = {};
+      if (filters.lance_inicial_min !== undefined) {
+        where.lance_inicial[Op.gte] = filters.lance_inicial_min;
+      }
+      if (filters.lance_inicial_max !== undefined) {
+        where.lance_inicial[Op.lte] = filters.lance_inicial_max;
+      }
+    }
+
+    // Filtro por data de criação
+    if (filters.data_inicio || filters.data_fim) {
+      where.created_at = {};
+      if (filters.data_inicio) {
+        where.created_at[Op.gte] = new Date(filters.data_inicio);
+      }
+      if (filters.data_fim) {
+        where.created_at[Op.lte] = new Date(filters.data_fim);
+      }
+    }
+
+    // Filtro por data de término do leilão
+    if (filters.data_termino_inicio || filters.data_termino_fim) {
+      where.data_termino = {};
+      if (filters.data_termino_inicio) {
+        where.data_termino[Op.gte] = new Date(filters.data_termino_inicio);
+      }
+      if (filters.data_termino_fim) {
+        where.data_termino[Op.lte] = new Date(filters.data_termino_fim);
+      }
     }
 
     const offset = (page - 1) * limit;
 
     const { rows, count } = await this.leiloes.findAndCountAll({
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       where,
       limit,
       offset,
-      order: [["id", "ASC"]],
+      order: [["created_at", "DESC"]],
     });
 
     return {
       data: rows,
-      total: count,
-      page,
-      lastPage: Math.ceil(count / limit),
+      meta: {
+        total: count,
+        page,
+        limit,
+        totalPages: Math.ceil(count / limit),
+      },
     };
   }
 
   async visualizar(id: number) {
-    return this.leiloes.findOne({
+    const leilao = await this.leiloes.findOne({
       where: { id },
       include: [{ model: Lance, as: "lances" }],
     });
+
+    if (!leilao) {
+      throw new NotFoundException(`Leilão com ID ${id} não encontrado`);
+    }
+
+    return leilao;
   }
 
   async atualizar(id: number, dados: AtualizarLeilaoDto) {
-    return this.leiloes.update(dados, { where: { id } });
+    const leilao = await this.leiloes.findByPk(id);
+
+    if (!leilao) {
+      throw new NotFoundException(`Leilão com ID ${id} não encontrado`);
+    }
+
+    await this.leiloes.update(dados, { where: { id } });
+    return await this.visualizar(id);
   }
 
   async deletar(id: number) {
-    const deletarleilao = this.leiloes.destroy({ where: { id } });
-    return deletarleilao;
+    const leilao = await this.leiloes.findByPk(id);
+
+    if (!leilao) {
+      throw new NotFoundException(`Leilão com ID ${id} não encontrado`);
+    }
+
+    await this.leiloes.destroy({ where: { id } });
+    return { message: 'Leilão removido com sucesso' };
   }
 }
