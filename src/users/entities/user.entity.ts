@@ -8,7 +8,7 @@ import {
   CreatedAt,
   UpdatedAt,
 } from 'sequelize-typescript';
-import { NivelUsuario } from '../../nivel-usuario/nivelUsuario.model';
+import { NivelUsuario } from '../../nivelUsuario/nivelUsuario.model';
 
 @Table({
   tableName: 'users',

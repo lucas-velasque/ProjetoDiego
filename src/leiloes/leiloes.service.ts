@@ -11,11 +11,7 @@ import { Lance } from "./entities/lance.model";
 import { Op, WhereOptions } from "sequelize";
 import { CriarLeilaoDto } from "./dto/criar-leilao.dto";
 import { AtualizarLeilaoDto } from "./dto/atualizar-leilao.dto";
-<<<<<<< HEAD
 import { FiltroLeilaoDto } from "./dto/filtro-leilao.dto";
-=======
-import { ListarLeiloesDto } from "./dto/listar-leiloes.dto";
->>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
 
 @Injectable()
 export class LeiloesService {
@@ -28,7 +24,6 @@ export class LeiloesService {
     return this.leiloes.create(dados as any);
   }
 
-<<<<<<< HEAD
   async listar(filtros: FiltroLeilaoDto = {}) {
     const { page = 1, limit = 10, ...filters } = filtros;
 
@@ -39,30 +34,7 @@ export class LeiloesService {
       where.titulo = {
         [Op.iLike]: `%${filters.titulo}%`,
       };
-=======
-  async listar({
-    titulo,
-    page = 1,
-    limit = 10,
-    status,
-    usuarioId,
-    ganhadorId,
-  }: ListarLeiloesDto) {
-    const where: WhereOptions<Leilao> & {
-      id_usuario?: number;
-      ganhadorId?: number;
-    } = {};
-
-    if (titulo) {
-      where.titulo = { [Op.iLike]: `%${titulo}%` };
->>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
     }
-    if (status && (status === "aberto" || status === "encerrado")) {
-      where.status = status as Leilao["status"];
-    }
-    if (usuarioId != null) where.id_usuario = usuarioId;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    if (ganhadorId != null) where.ganhadorId = ganhadorId;
 
     // Filtro por status
     if (filters.status) {
@@ -118,18 +90,12 @@ export class LeiloesService {
 
     return {
       data: rows,
-<<<<<<< HEAD
       meta: {
         total: count,
         page,
         limit,
         totalPages: Math.ceil(count / limit),
       },
-=======
-      total: count,
-      page: Number(page),
-      lastPage: Math.ceil(count / limit),
->>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
     };
   }
 
@@ -147,14 +113,13 @@ export class LeiloesService {
   }
 
   async atualizar(id: number, dados: AtualizarLeilaoDto) {
-<<<<<<< HEAD
     const leilao = await this.leiloes.findByPk(id);
 
     if (!leilao) {
       throw new NotFoundException(`Leilão com ID ${id} não encontrado`);
     }
 
-    await this.leiloes.update(dados, { where: { id } });
+    await this.leiloes.update(dados as any, { where: { id } });
     return await this.visualizar(id);
   }
 
@@ -167,97 +132,75 @@ export class LeiloesService {
 
     await this.leiloes.destroy({ where: { id } });
     return { message: 'Leilão removido com sucesso' };
-=======
-    return this.leiloes.update(dados as any, { where: { id } });
   }
 
-  async deletar(id: number) {
-    return this.leiloes.destroy({ where: { id } });
-  }
-  async darLance(id_usuario: number, id_leilao: number, valor: number) {
-    const leilao = await this.leiloes.findOne({ where: { id: id_leilao } });
-    if (!leilao) throw new NotFoundException("Leilão não encontrado");
+  async darLance(usuarioId: number, leilaoId: number, valor: number) {
+    const leilao = await this.leiloes.findByPk(leilaoId);
 
-    const agora = new Date();
-    if (
-      !leilao.ativo ||
-      (leilao.terminaEm && new Date(leilao.terminaEm) < agora)
-    ) {
-      throw new BadRequestException("Leilão não está ativo");
+    if (!leilao) {
+      throw new NotFoundException(`Leilão com ID ${leilaoId} não encontrado`);
     }
 
-    if (leilao.id_usuario === id_usuario) {
-      throw new ForbiddenException("Vendedor não pode dar lance");
+    if (leilao.status !== 'aberto') {
+      throw new BadRequestException('Leilão não está aberto para lances');
     }
 
-    const atual = Number(leilao.precoAtual ?? 0);
-    const incremento = Number(leilao.valor_incremento ?? 0);
-    const minimo = atual + incremento;
-
-    if (Number(valor) <= atual || (incremento > 0 && Number(valor) < minimo)) {
-      throw new BadRequestException(`Lance mínimo: ${minimo.toFixed(2)}`);
+    if (valor <= leilao.precoInicial) {
+      throw new BadRequestException('O lance deve ser maior que o preço inicial');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    await this.lances.create({
-      id_leilao: id_leilao.toString(),
-      id_usuario,
-      valor: Number(valor),
+    const lance = await this.lances.create({
+      id_leilao: leilaoId,
+      id_usuario: usuarioId,
+      valor,
     } as any);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    await leilao.update({ precoAtual: Number(valor) } as any);
-
-    return { ok: true, precoAtual: Number(valor) };
+    return { lance, leilao };
   }
 
-  // 2) Encerrar manualmente
   async encerrarManual(id: number) {
-    const leilao = await this.leiloes.findByPk(id);
-    if (!leilao) throw new NotFoundException("Leilão não encontrado");
-
-    if (leilao.status && leilao.status === "encerrado") {
-      return leilao; // já encerrado
-    }
-
-    // pega maior lance (se existir)
-    const maiorLance = await this.lances.findOne({
-      where: { id_leilao: id },
-      order: [["valor", "DESC"]],
+    const leilao = await this.leiloes.findByPk(id, {
+      include: [{ model: Lance, as: 'lances' }],
     });
 
-    const updatePayload: Partial<Leilao> = {
-      status: "encerrado",
-      ativo: false,
-      terminaEm: new Date(),
-      precoAtual: maiorLance
-        ? Number(maiorLance.valor)
-        : (leilao.precoAtual ?? 0),
-    };
-
-    if (maiorLance) {
-      updatePayload.ganhadorId = maiorLance.id_usuario;
+    if (!leilao) {
+      throw new NotFoundException(`Leilão com ID ${id} não encontrado`);
     }
 
-    await leilao.update(updatePayload);
+    if (leilao.status === 'encerrado') {
+      throw new BadRequestException('Leilão já está encerrado');
+    }
+
+    await leilao.update({ status: 'encerrado' });
     return leilao;
   }
 
   async leiloesVencidosPor(usuarioId: number) {
-    return this.leiloes.findAll({
+    const leiloes = await this.leiloes.findAll({
       where: {
-        status: "encerrado",
-        ganhadorId: usuarioId,
-      } satisfies Partial<Leilao>,
-      order: [["id", "DESC"]],
+        status: 'encerrado',
+      },
+      include: [
+        {
+          model: Lance,
+          as: 'lances',
+          where: { id_usuario: usuarioId },
+          required: true,
+        },
+      ],
     });
+
+    return leiloes;
   }
 
   async meusLeiloesAtivos(usuarioId: number) {
-    return this.leiloes.findAll({
-      where: { id_usuario: usuarioId, ativo: true },
-      order: [["id", "DESC"]],
+    const leiloes = await this.leiloes.findAll({
+      where: {
+        id_usuario: usuarioId,
+        status: 'aberto',
+      },
     });
->>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
+
+    return leiloes;
   }
 }

@@ -16,12 +16,8 @@ import {
 import { LeiloesService } from "./leiloes.service";
 import { CriarLeilaoDto } from "./dto/criar-leilao.dto";
 import { AtualizarLeilaoDto } from "./dto/atualizar-leilao.dto";
-<<<<<<< HEAD
 import { FiltroLeilaoDto } from "./dto/filtro-leilao.dto";
-=======
 import { CriarLanceDto } from "./dto/criar-lance.dto";
-import { ListarLeiloesDto } from "./dto/listar-leiloes.dto";
->>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
 import { Public } from "src/common/decorators/public.decorator";
 
 @Public()
@@ -41,12 +37,7 @@ export class LeiloesController {
   }
 
   @Get()
-<<<<<<< HEAD
   async listar(@Query() filtros: FiltroLeilaoDto) {
-=======
-  @Get()
-  async listar(@Query() query: ListarLeiloesDto) {
->>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
     try {
       const result = await this.service.listar(filtros);
       return {

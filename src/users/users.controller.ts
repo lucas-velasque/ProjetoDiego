@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import {
   Controller,
   Get,
@@ -9,54 +8,26 @@ import {
   Delete,
   Query,
   ParseIntPipe,
+  Put,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FiltroUserDto } from './dto/filtro-user.dto';
-import { Public } from '../common/decorators/public.decorator';
-=======
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Body, 
-  Param, 
-  Put, 
-  Delete, 
-  UseGuards, 
-  HttpCode, 
-  HttpStatus,
-  Query,
-  ParseIntPipe
-} from '@nestjs/common';
-import { 
-  ApiTags, 
-  ApiOperation, 
-  ApiResponse, 
-  ApiParam,
-  ApiBearerAuth,
-  ApiBody
-} from '@nestjs/swagger';
-import { Public } from 'src/common/decorators/public.decorator';
-import { UsersService } from './users.service';
-import { Roles } from '../common/decorators/roles.decorator';
-import { Role } from '../common/roles.enum';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { FilterUserDto } from './dto/filter-user.dto';
 import { PaginatedUsersDto } from './dto/paginated-users-response.dto';
 import { UserResponseDto } from './dto/user-response.dto';
->>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
+import { Public } from '../common/decorators/public.decorator';
 
 @ApiTags('Usuários')
 @Controller('users')
-@UseGuards(RolesGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-<<<<<<< HEAD
   @Public()
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
@@ -64,58 +35,6 @@ export class UsersController {
   }
 
   @Public()
-  @Get()
-  findAll(@Query() filtros: FiltroUserDto) {
-    return this.usersService.findAll(filtros);
-  }
-
-  @Public()
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.findOne(id);
-  }
-
-  @Public()
-  @Patch(':id')
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateUserDto: UpdateUserDto,
-  ) {
-    return this.usersService.update(id, updateUserDto);
-  }
-
-  @Public()
-  @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.remove(id);
-=======
-  @Post()
-  @Public()
-  @ApiOperation({ 
-    summary: 'Criar um novo usuário',
-    description: 'Endpoint público para registro de novos usuários na loja de cartas Pokémon'
-  })
-  @ApiBody({ type: CreateUserDto })
-  @ApiResponse({ 
-    status: 201, 
-    description: 'Usuário criado com sucesso',
-    type: UserResponseDto
-  })
-  @ApiResponse({ 
-    status: 400, 
-    description: 'Dados inválidos' 
-  })
-  @ApiResponse({ 
-    status: 409, 
-    description: 'Nome de usuário já está em uso' 
-  })
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
->>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
-  }
-
-  @Get()
-  @Roles(Role.Admin)
   @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Listar todos os usuários com filtros e paginação',
@@ -134,12 +53,11 @@ export class UsersController {
     status: 403, 
     description: 'Acesso negado - apenas administradores' 
   })
-  findAll(@Query() filterDto: FilterUserDto): Promise<PaginatedUsersDto> {
+  findAll(@Query() filterDto: FilterUserDto) {
     return this.usersService.findAll(filterDto);
   }
 
   @Get(':id')
-  @Roles(Role.Admin)
   @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Buscar usuário por ID',
@@ -169,11 +87,10 @@ export class UsersController {
     description: 'Usuário não encontrado' 
   })
   findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.findById(id);
+    return this.usersService.findOne(id);
   }
 
   @Put(':id')
-  @Roles(Role.Admin)
   @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Atualizar dados de um usuário',
@@ -219,7 +136,6 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @Roles(Role.Admin)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ 
@@ -249,6 +165,6 @@ export class UsersController {
     description: 'Usuário não encontrado' 
   })
   remove(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.delete(id);
+    return this.usersService.remove(id);
   }
 }

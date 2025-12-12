@@ -12,7 +12,6 @@ export class AuthService {
 
   async signIn(
     username: string,
-<<<<<<< HEAD
     password: string,
   ): Promise<{ access_token: string; user: any }> {
     // Buscar usuário por username
@@ -46,18 +45,6 @@ export class AuthService {
     };
 
     // Retornar token e dados do usuário (sem senha)
-=======
-    pass: string,
-  ): Promise<{ access_token: string }> {
-    const user = await this.usersService.findOne(username);
-    
-    if (!user || !(await user.validatePassword(pass))) {
-      throw new UnauthorizedException('Credenciais inválidas');
-    }
-    
-    const payload = { sub: user.id, username: user.username, role: user.role };
-    
->>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
     return {
       access_token: await this.jwtService.signAsync(payload),
       user: {
@@ -73,12 +60,16 @@ export class AuthService {
     };
   }
 
-<<<<<<< HEAD
   async validateUser(userId: number) {
     return await this.usersService.findOne(userId);
-=======
-  async signUp(username: string, password: string): Promise<User> {
-    return this.usersService.create({ username, password });
->>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
+  }
+
+  async signUp(username: string, password: string) {
+    return this.usersService.create({
+      username,
+      senha: password,
+      nome: username,
+      email: `${username}@example.com`,
+    });
   }
 }

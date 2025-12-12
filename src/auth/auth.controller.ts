@@ -9,12 +9,9 @@ import {
   UseGuards
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-<<<<<<< HEAD
 import { LoginDto } from './dto/login.dto';
-=======
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { Public } from '../common/decorators/public.decorator';
->>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
 
 @ApiTags('autenticação')
 @Controller('auth')
@@ -25,10 +22,6 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('login')
-<<<<<<< HEAD
-  signIn(@Body() loginDto: LoginDto) {
-    return this.authService.signIn(loginDto.username, loginDto.password);
-=======
   @ApiOperation({
     summary: 'Fazer login',
     description: 'Autentica um usuário e retorna um token JWT para acesso aos endpoints protegidos'
@@ -54,9 +47,8 @@ export class AuthController {
     }
   })
   @ApiResponse({ status: 401, description: 'Credenciais inválidas' })
-  signIn(@Body() signInDto: Record<string, any>) {
-    return this.authService.signIn(signInDto.username, signInDto.password);
->>>>>>> da4c679c4f39eca5d9247b8d3d2f5dfee3b94036
+  signIn(@Body() loginDto: LoginDto) {
+    return this.authService.signIn(loginDto.username, loginDto.password);
   }
 
   // Adicionei informações sobre o endpoint para o swagger
