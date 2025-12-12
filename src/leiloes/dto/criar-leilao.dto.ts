@@ -1,81 +1,60 @@
-import { IsString, IsNumber, Min } from "class-validator";
+import {
+  IsString,
+  IsNumber,
+  Min,
+  IsOptional,
+  IsDateString,
+} from "class-validator";
+import { Type } from "class-transformer";
 import { ApiProperty } from "@nestjs/swagger";
 
 export class CriarLeilaoDto {
-  @ApiProperty({
-    description: "Título do leilão da carta Pokémon",
-    example: "Charizard Raro",
-  })
+  @ApiProperty()
   @IsString()
   titulo!: string;
 
-  @ApiProperty({
-    description: "Descrição detalhada da carta Pokémon",
-    example:
-      "Charizard primeira edição em perfeito estado, avaliada por especialistas",
-  })
+  @ApiProperty({ required: false })
+  @IsOptional()
   @IsString()
-  descricao!: string;
+  descricao?: string;
 
-  @ApiProperty({
-    description: "Preço inicial do leilão em unidades monetárias",
-    minimum: 0,
-    example: 1000,
-  })
+  @ApiProperty({ example: "aberto" })
+  @IsString()
+  status!: string;
+
+  @ApiProperty({ example: 100 })
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
   precoInicial!: number;
 
-  @ApiProperty({
-    description: "Categoria da carta Pokémon",
-    example: "Rara",
-  })
-  @IsString()
-  categoria!: string;
-
-  @ApiProperty({
-    description: "Status inicial do leilão",
-    enum: ["ativo", "rascunho"],
-    example: "ativo",
-  })
-  @IsString()
-  status!: string;
-
-  @ApiProperty({
-    description: "Data e hora de término do leilão (ISO 8601)",
-    example: "2024-12-31T23:59:59Z",
-  })
-  @IsString()
-  data_fim!: string;
-
-  @ApiProperty({
-    description: "ID do usuário criador do leilão",
-    example: 1,
-  })
+  @ApiProperty({ example: 100 })
+  @Type(() => Number)
   @IsNumber()
-  id_usuario_criar!: number;
+  @Min(0)
+  precoAtual!: number;
 
-  @ApiProperty({
-    description: "Valor inicial do leilão",
-    minimum: 0,
-    example: 1000,
-  })
+  @ApiProperty({ example: 5 })
+  @Type(() => Number)
   @IsNumber()
-  valor_inicial!: number;
-
-  @ApiProperty({
-    description: "Valor atual do leilão (inicialmente igual ao valor inicial)",
-    minimum: 0,
-    example: 1000,
-  })
-  @IsNumber()
-  valor_atual!: number;
-
-  @ApiProperty({
-    description: "Valor mínimo de incremento para novos lances",
-    minimum: 0,
-    example: 50,
-  })
-  @IsNumber()
+  @Min(1)
   valor_incremento!: number;
+
+  @ApiProperty({
+    example: "2030-12-31T23:59:59.000Z",
+    description: "Data/hora de término em formato ISO",
+  })
+  @IsDateString()
+  terminaEm!: string;
+
+  @ApiProperty({ example: 1 })
+  @Type(() => Number)
+  @IsNumber()
+  vendedorId!: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  categoriaLeilaoId?: number;
 }

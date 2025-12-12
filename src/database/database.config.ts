@@ -1,16 +1,26 @@
-import { SequelizeModuleOptions } from '@nestjs/sequelize';
-import * as dotenv from 'dotenv';
+import { SequelizeModuleOptions } from "@nestjs/sequelize";
+import * as dotenv from "dotenv";
 
 dotenv.config();
 
 export const databaseConfig: SequelizeModuleOptions = {
-  dialect: 'postgres',
-  host: process.env.DB_HOST || 'db.hfdllcymbezkmerewsct.supabase.co',
-  port: parseInt(process.env.DB_PORT || '5432'),
-  username: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME || 'postgres',
+  dialect: "postgres",
+
+  // Docker (host) default: localhost; you can override via DB_HOST in .env
+  host: process.env.DB_HOST || "localhost",
+  port: Number(process.env.DB_PORT || 5432),
+
+  username: process.env.DB_USER || "postgres",
+
+  // IMPORTANT: .env uses DB_PASS (not DB_PASSWORD)
+  // Keep compatibility with either name:
+  password: process.env.DB_PASS || process.env.DB_PASSWORD || "postgres",
+
+  database: process.env.DB_NAME || "leiloes",
+
   autoLoadModels: true,
   synchronize: true,
-  logging: console.log, // Mostra SQL no console
+
+  // Mostra SQL no console
+  logging: console.log,
 };

@@ -1,0 +1,37 @@
+// VSCode REST Client file (install "REST Client" extension).
+@base = http://localhost:3000
+
+### Criar leilão
+POST {{base}}/leiloes
+Content-Type: application/json
+
+{
+  "titulo": "Leilão Teste",
+  "status": "aberto",
+  "precoInicial": 100,
+  "precoAtual": 100,
+  "valor_incremento": 5,
+  "terminaEm": "2030-12-31T23:59:59.000Z",
+  "vendedorId": 1
+}
+
+### Listar
+GET {{base}}/leiloes?titulo=Teste&status=aberto&page=1&limit=10
+
+### Dar lance (troque :id)
+POST {{base}}/leiloes/:id/lances
+Content-Type: application/json
+
+{
+  "id_usuario": 2,
+  "valor": 120
+}
+
+### Encerrar
+PATCH {{base}}/leiloes/:id/encerrar
+
+### Meus leilões ativos
+GET {{base}}/leiloes/me/ativos?usuarioId=1
+
+### Vencidos por mim
+GET {{base}}/leiloes/me/vencidos?usuarioId=2

@@ -1,4 +1,4 @@
-// src/leiloes/leiloes.controller.ts
+//aaaaaa
 import {
   Controller,
   Get,
@@ -16,11 +16,9 @@ import {
 import { LeiloesService } from "./leiloes.service";
 import { CriarLeilaoDto } from "./dto/criar-leilao.dto";
 import { AtualizarLeilaoDto } from "./dto/atualizar-leilao.dto";
-import { FiltroLeilaoDto } from "./dto/filtro-leilao.dto";
 import { CriarLanceDto } from "./dto/criar-lance.dto";
-import { Public } from "src/common/decorators/public.decorator";
+import { ListarLeiloesDto } from "./dto/listar-leiloes.dto";
 
-@Public()
 @Controller("leiloes")
 export class LeiloesController {
   constructor(private readonly service: LeiloesService) {}
@@ -37,12 +35,13 @@ export class LeiloesController {
   }
 
   @Get()
-  async listar(@Query() filtros: FiltroLeilaoDto) {
+  async listar(@Query() query: ListarLeiloesDto) {
     try {
-      const result = await this.service.listar(filtros);
+      const { data, total, page, lastPage } = await this.service.listar(query);
       return {
         message: "Leilões listados com sucesso.",
-        ...result,
+        data,
+        meta: { total, page, lastPage },
       };
     } catch {
       throw new InternalServerErrorException("Falha ao listar leilões.");
@@ -50,10 +49,12 @@ export class LeiloesController {
   }
 
   @Get(":id")
-  async visualizar(@Param("id", ParseIntPipe) id: number) {
+  async visualizar(@Param("id") id: string) {
     try {
       const data = await this.service.visualizar(id);
-      if (!data) throw new NotFoundException("Leilão não encontrado.");
+      if (!data) {
+        throw new NotFoundException("Leilão não encontrado.");
+      }
       return { message: "Leilão recuperado com sucesso.", data };
     } catch (err) {
       if (err instanceof HttpException) throw err;
@@ -62,19 +63,20 @@ export class LeiloesController {
   }
 
   @Patch(":id")
-  async atualizar(
-    @Param("id", ParseIntPipe) id: number,
-    @Body() dto: AtualizarLeilaoDto,
-  ) {
+  async atualizar(@Param("id") id: string, @Body() dto: AtualizarLeilaoDto) {
     try {
       const result = await this.service.atualizar(id, dto);
+
       const affected = Array.isArray(result)
         ? result[0]
         : typeof result === "number"
           ? result
           : 0;
-      if (!affected)
+
+      if (!affected) {
         throw new NotFoundException("Leilão não encontrado para atualização.");
+      }
+
       const data = await this.service.visualizar(id);
       return { message: "Leilão atualizado com sucesso.", data };
     } catch (err) {
@@ -84,11 +86,12 @@ export class LeiloesController {
   }
 
   @Delete(":id")
-  async deletar(@Param("id", ParseIntPipe) id: number) {
+  async deletar(@Param("id") id: string) {
     try {
       const deleted = await this.service.deletar(id);
-      if (!deleted)
+      if (!deleted) {
         throw new NotFoundException("Leilão não encontrado para exclusão.");
+      }
       return { message: "Leilão removido com sucesso." };
     } catch (err) {
       if (err instanceof HttpException) throw err;
@@ -98,16 +101,14 @@ export class LeiloesController {
 
   // Dar lance
   @Post(":id/lances")
-  async darLance(
-    @Param("id", ParseIntPipe) leilaoId: number,
-    @Body() dto: CriarLanceDto,
-  ) {
+  async darLance(@Param("id") leilaoId: string, @Body() dto: CriarLanceDto) {
     try {
-      if (dto.id_usuario == null) {
+      if (dto.id_usuario == null || dto.valor == null) {
         return {
           message: "Informe o id do usuário (id_usuario) e o valor do lance.",
         };
       }
+
       const resp = await this.service.darLance(
         dto.id_usuario,
         leilaoId,
@@ -122,7 +123,7 @@ export class LeiloesController {
 
   // Encerrar leilão manualmente
   @Patch(":id/encerrar")
-  async encerrar(@Param("id", ParseIntPipe) id: number) {
+  async encerrar(@Param("id") id: string) {
     try {
       const data = await this.service.encerrarManual(id);
       return { message: "Leilão encerrado manualmente.", data };
