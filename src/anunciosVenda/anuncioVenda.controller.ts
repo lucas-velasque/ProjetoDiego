@@ -52,24 +52,28 @@ export class AnunciosVendaController {
     return this.service.buscarPorId(+id);
   }
 
-  @Public()
   @Put(':id')
   @ApiOperation({ summary: 'Atualizar um anúncio de venda' })
   @ApiParam({ name: 'id', type: Number, description: 'ID do anúncio' })
   @ApiResponse({ status: 200, description: 'Anúncio atualizado com sucesso' })
   @ApiResponse({ status: 404, description: 'Anúncio não encontrado' })
   @ApiResponse({ status: 400, description: 'Dados inválidos' })
-  atualizar(@Param('id') id: string, @Body() dto: UpdateAnuncioVendaDto) {
-    return this.service.atualizar(+id, dto);
+  @ApiResponse({ status: 401, description: 'Não autorizado' })
+  @ApiResponse({ status: 403, description: 'Sem permissão para editar este anúncio' })
+  atualizar(@Param('id') id: string, @Body() dto: UpdateAnuncioVendaDto, @UsuarioAtual() usuario) {
+    const usuarioId = usuario.sub;
+    return this.service.atualizar(+id, dto, usuarioId);
   }
 
-  @Public()
   @Delete(':id')
   @ApiOperation({ summary: 'Deletar um anúncio de venda' })
   @ApiParam({ name: 'id', type: Number, description: 'ID do anúncio' })
   @ApiResponse({ status: 200, description: 'Anúncio deletado com sucesso' })
   @ApiResponse({ status: 404, description: 'Anúncio não encontrado' })
-  deletar(@Param('id') id: string) {
-    return this.service.deletar(+id);
+  @ApiResponse({ status: 401, description: 'Não autorizado' })
+  @ApiResponse({ status: 403, description: 'Sem permissão para deletar este anúncio' })
+  deletar(@Param('id') id: string, @UsuarioAtual() usuario) {
+    const usuarioId = usuario.sub;
+    return this.service.deletar(+id, usuarioId);
   }
 }

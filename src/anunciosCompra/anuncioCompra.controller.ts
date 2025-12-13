@@ -83,59 +83,75 @@ export class AnunciosCompraController {
     return this.service.buscarPorId(+id);
   }
 
-  @Public()
   @Put(':id')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Atualizar anúncio de compra',
-    description: 'Atualiza um anúncio de compra existente' 
+    description: 'Atualiza um anúncio de compra existente'
   })
-  @ApiParam({ 
-    name: 'id', 
-    type: 'number', 
+  @ApiParam({
+    name: 'id',
+    type: 'number',
     description: 'ID do anúncio de compra a ser atualizado',
-    example: 1 
+    example: 1
   })
-  @ApiBody({ 
+  @ApiBody({
     type: UpdateAnuncioCompraDto,
-    description: 'Dados para atualização do anúncio de compra' 
+    description: 'Dados para atualização do anúncio de compra'
   })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'Anúncio de compra atualizado com sucesso' 
+  @ApiResponse({
+    status: 200,
+    description: 'Anúncio de compra atualizado com sucesso'
   })
-  @ApiResponse({ 
-    status: 404, 
-    description: 'Anúncio de compra não encontrado' 
+  @ApiResponse({
+    status: 404,
+    description: 'Anúncio de compra não encontrado'
   })
-  @ApiResponse({ 
-    status: 400, 
-    description: 'Dados inválidos fornecidos' 
+  @ApiResponse({
+    status: 400,
+    description: 'Dados inválidos fornecidos'
   })
-  atualizar(@Param('id') id: string, @Body() dto: UpdateAnuncioCompraDto) {
-    return this.service.atualizar(+id, dto);
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado'
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Sem permissão para editar este anúncio'
+  })
+  atualizar(@Param('id') id: string, @Body() dto: UpdateAnuncioCompraDto, @UsuarioAtual() usuario) {
+    const usuarioId = usuario.sub;
+    return this.service.atualizar(+id, dto, usuarioId);
   }
 
-  @Public()
   @Delete(':id')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Deletar anúncio de compra',
-    description: 'Remove um anúncio de compra do sistema' 
+    description: 'Remove um anúncio de compra do sistema'
   })
-  @ApiParam({ 
-    name: 'id', 
-    type: 'number', 
+  @ApiParam({
+    name: 'id',
+    type: 'number',
     description: 'ID do anúncio de compra a ser deletado',
-    example: 1 
+    example: 1
   })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'Anúncio de compra deletado com sucesso' 
+  @ApiResponse({
+    status: 200,
+    description: 'Anúncio de compra deletado com sucesso'
   })
-  @ApiResponse({ 
-    status: 404, 
-    description: 'Anúncio de compra não encontrado' 
+  @ApiResponse({
+    status: 404,
+    description: 'Anúncio de compra não encontrado'
   })
-  deletar(@Param('id') id: string) {
-    return this.service.deletar(+id);
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado'
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Sem permissão para deletar este anúncio'
+  })
+  deletar(@Param('id') id: string, @UsuarioAtual() usuario) {
+    const usuarioId = usuario.sub;
+    return this.service.deletar(+id, usuarioId);
   }
 }
