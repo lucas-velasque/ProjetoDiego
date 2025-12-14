@@ -1,5 +1,8 @@
+import { RolesGuard } from "./../common/guards/roles.guard";
+import { Roles } from "./../common/decorators/roles.decorator";
 import {
   Controller,
+  UseGuards,
   Get,
   Post,
   Body,
@@ -10,14 +13,11 @@ import {
   Query,
   NotFoundException,
   BadRequestException,
-  UseGuards,
 } from "@nestjs/common";
 import { CategoriaCartasService } from "./categoriaCartas.service";
 import { criarCategoriaCartaDto } from "./dto/criarCategoriaCarta";
 import { atualizarCategoriaCartaDto } from "./dto/atualizarCategoriaCarta";
-import { RolesGuard } from "./../common/guards/roles.guard";
-import { Roles } from "./../common/decorators/roles.decorator";
-import { Role } from "./../common/roles.enum";
+import { Role } from "../common/roles.enum";
 import {
   ApiTags,
   ApiOperation,
@@ -27,8 +27,8 @@ import {
   ApiBody,
 } from "@nestjs/swagger";
 
-@ApiTags("CategoriaCartas")
-@Controller("CategoriaCartas")
+@ApiTags("categoria-cartas")
+@Controller("categoriaCartas")
 @UseGuards(RolesGuard)
 export class CategoriaCartasController {
   constructor(private readonly servico: CategoriaCartasService) {}
@@ -44,7 +44,7 @@ export class CategoriaCartasController {
     status: 400,
     description: "Erro ao criar categoria de carta.",
   })
-  @ApiBody({ type: criarCategoriaCartaDto, required: true })
+  @ApiBody({ type: criarCategoriaCartaDto })
   async criar(@Body() dadosCriacao: criarCategoriaCartaDto) {
     try {
       const categoriaCriada = await this.servico.criar(dadosCriacao);
@@ -87,14 +87,14 @@ export class CategoriaCartasController {
   async listar(
     @Query("nome") nome?: string,
     @Query("tipo") tipo?: string,
-    @Query("page") page?: string,
-    @Query("limit") limit?: string
+    @Query("page") pagina?: string,
+    @Query("limit") limite?: string
   ) {
     const filtros = {
       nome,
       tipo,
-      page: page ? parseInt(page, 10) : undefined,
-      limit: limit ? parseInt(limit, 10) : undefined,
+      page: pagina ? parseInt(pagina, 10) : undefined,
+      limit: limite ? parseInt(limite, 10) : undefined,
     };
     return await this.servico.listar(filtros);
   }
@@ -147,15 +147,20 @@ export class CategoriaCartasController {
     @Param("id", ParseIntPipe) id: number,
     @Body() dadosAtualizacao: atualizarCategoriaCartaDto
   ) {
-    const categoriaAtualizada = await this.servico.atualizar(id, dadosAtualizacao);
+    const categoriaAtualizada = await this.servico.atualizar(
+      id,
+      dadosAtualizacao
+    );
+
     if (!categoriaAtualizada) {
       throw new NotFoundException(
         "Categoria de carta não encontrada para atualização."
       );
     }
+
     return {
       mensagem: "Categoria de carta atualizada com sucesso.",
-      dados: categoriaAtualizada,
+      dados: dadosAtualizacao,
     };
   }
 
@@ -177,11 +182,13 @@ export class CategoriaCartasController {
   })
   async deletar(@Param("id", ParseIntPipe) id: number) {
     const resultado = await this.servico.deletar(id);
+
     if (!resultado) {
       throw new NotFoundException(
         "Categoria de carta não encontrada para exclusão."
       );
     }
+
     return { mensagem: "Categoria de carta excluída com sucesso." };
   }
 }
