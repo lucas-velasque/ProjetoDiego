@@ -2,9 +2,12 @@ import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
+import { UploadService } from "./upload/upload.service";
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe());
+
   // ✅ CORS (DEV): permite qualquer origin (inclui 192.168.1.62:3001)
   app.enableCors({
     origin: true, // reflete o Origin automaticamente
@@ -12,6 +15,12 @@ async function bootstrap() {
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   });
+
+  // Inicializar bucket do Supabase Storage
+  const uploadService = app.get(UploadService);
+  await uploadService.ensureBucketExists();
+  console.log('✅ Supabase Storage bucket verificado/criado');
+
   const config = new DocumentBuilder()
     .setTitle("API de Loja de Cartas Pokémon")
     .setDescription("API para gerenciamento ...")

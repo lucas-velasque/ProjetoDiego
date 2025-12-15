@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Get,
   UploadedFile,
   UseInterceptors,
   BadRequestException,
@@ -8,12 +9,34 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from './upload.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import { Public } from '../common/decorators/public.decorator';
 
 @ApiTags('upload')
 @ApiBearerAuth()
 @Controller('upload')
 export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
+
+  @Public()
+  @Get('test')
+  @ApiOperation({ summary: 'Testar conexão com Supabase Storage' })
+  @ApiResponse({ status: 200, description: 'Teste realizado com sucesso' })
+  async testConnection() {
+    try {
+      await this.uploadService.ensureBucketExists();
+      return {
+        success: true,
+        message: 'Conexão com Supabase Storage OK',
+        bucketName: 'anuncios-fotos'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Erro ao conectar com Supabase Storage',
+        error: error.message
+      };
+    }
+  }
 
   @Post('image')
   @ApiOperation({ summary: 'Fazer upload de uma imagem' })
