@@ -21,6 +21,11 @@ class CreateAnuncioVendaCartaDto {
   @IsString()
   @IsOptional()
   observacoes?: string;
+
+  @ApiPropertyOptional({ description: 'URL da foto da carta', example: 'https://supabase.co/storage/...' })
+  @IsString()
+  @IsOptional()
+  foto_url?: string;
 }
 
 export class CreateAnuncioVendaDto {

@@ -36,6 +36,7 @@ export class AnunciosVendaService {
         quantidade: carta.quantidade,
         condicao: carta.condicao || 'Near Mint',
         observacoes: carta.observacoes,
+        foto_url: carta.foto_url,
       }));
 
       await this.anuncioVendaCartaModel.bulkCreate(cartas);

@@ -14,9 +14,13 @@ export class CartasService {
     private cartaModel: typeof Carta,
   ) {}
 
-  async create(createCartaDto: CreateCartaDto): Promise<Carta> {
+  async create(createCartaDto: CreateCartaDto) {
     const carta = await this.cartaModel.create(createCartaDto as any);
-    return await this.findOne(carta.id);
+    const cartaCriada = await this.findOne(carta.id);
+    return {
+      data: cartaCriada.data,
+      message: 'Carta criada com sucesso',
+    };
   }
 
   async findAll(filtros: FiltroCartaDto = {}) {
@@ -124,7 +128,7 @@ export class CartasService {
     };
   }
 
-  async findOne(id: number): Promise<Carta> {
+  async findOne(id: number) {
     const carta = await this.cartaModel.findByPk(id, {
       include: [
         {
@@ -139,10 +143,12 @@ export class CartasService {
       throw new NotFoundException(`Carta com ID ${id} não encontrada`);
     }
 
-    return carta;
+    return {
+      data: carta,
+    };
   }
 
-  async update(id: number, updateCartaDto: UpdateCartaDto): Promise<Carta> {
+  async update(id: number, updateCartaDto: UpdateCartaDto) {
     const carta = await this.cartaModel.findByPk(id);
 
     if (!carta) {
@@ -151,7 +157,11 @@ export class CartasService {
 
     await carta.update(updateCartaDto);
 
-    return await this.findOne(id);
+    const cartaAtualizada = await this.findOne(id);
+    return {
+      data: cartaAtualizada.data,
+      message: 'Carta atualizada com sucesso',
+    };
   }
 
   async remove(id: number): Promise<{ message: string }> {
