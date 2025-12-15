@@ -32,8 +32,11 @@ export class UsersService {
       throw new ConflictException('Username já cadastrado');
     }
 
-    // Hash da senha
-    const hashedPassword = await bcrypt.hash(createUserDto.senha, 10);
+    // Hash da senha (se fornecida)
+    let hashedPassword = '';
+    if (createUserDto.senha) {
+      hashedPassword = await bcrypt.hash(createUserDto.senha, 10);
+    }
 
     // Criar usuário
     const user = await this.userModel.create({
@@ -152,6 +155,18 @@ export class UsersService {
   async findOneByEmail(email: string): Promise<User | null> {
     return await this.userModel.findOne({
       where: { email },
+      include: [
+        {
+          model: NivelUsuario,
+          as: 'nivelUsuario',
+        },
+      ],
+    });
+  }
+
+  async findOneByClerkId(clerkId: string): Promise<User | null> {
+    return await this.userModel.findOne({
+      where: { clerk_id: clerkId },
       include: [
         {
           model: NivelUsuario,
