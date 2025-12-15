@@ -19,7 +19,6 @@ export class AnunciosVendaController {
   @ApiResponse({ status: 400, description: 'Dados inválidos' })
   @ApiResponse({ status: 401, description: 'Não autorizado' })
   criar(@Body() dto: CreateAnuncioVendaDto, @UsuarioAtual() usuario) {
-    // Extrai o ID do usuário autenticado do token JWT
     const usuarioId = usuario.sub;
     return this.service.criar(dto, usuarioId);
   }

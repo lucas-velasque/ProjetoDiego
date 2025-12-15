@@ -12,6 +12,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiQuery } from 
 export class AnunciosCompraController {
   constructor(private readonly service: AnunciosCompraService) {}
 
+  @Public()
   @Post()
   @ApiOperation({
     summary: 'Criar anúncio de compra',
@@ -34,8 +35,8 @@ export class AnunciosCompraController {
     description: 'Não autorizado'
   })
   criar(@Body() dto: CreateAnuncioCompraDto, @UsuarioAtual() usuario) {
-    // Extrai o ID do usuário autenticado do token JWT
-    const usuarioId = usuario.sub;
+    // TEMPORÁRIO: usar ID fixo para testes sem autenticação
+    const usuarioId = usuario?.sub || 1;
     return this.service.criar(dto, usuarioId);
   }
 

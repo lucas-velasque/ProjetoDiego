@@ -147,7 +147,18 @@ async listarTodos(filtros: FiltroAnuncioVendaDto) {
 
   async buscarPorId(id: number) {
     const anuncio = await this.anuncioVendaModel.findByPk(id, {
-      include: [AnuncioVendaCarta],
+      include: [
+        {
+          model: AnuncioVendaCarta,
+          as: 'cartas',
+          include: [
+            {
+              model: Carta,
+              as: 'carta',
+            },
+          ],
+        },
+      ],
     });
 
     if (!anuncio) {

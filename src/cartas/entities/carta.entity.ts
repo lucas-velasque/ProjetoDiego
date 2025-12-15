@@ -16,7 +16,7 @@ import { CategoriaCartas } from '../../categoriaCartas/categoriaCartas.model';
 })
 export class Carta extends Model {
   @Column({
-    type: DataType.STRING,
+    type: DataType.STRING(255),
     allowNull: false,
   })
   nome: string;
@@ -29,15 +29,21 @@ export class Carta extends Model {
 
   @Column({
     type: DataType.STRING(100),
-    allowNull: false,
+    allowNull: true,
   })
   declare tipo: string; // ex: Pokémon, Treinador, Energia
 
   @Column({
     type: DataType.STRING(50),
-    allowNull: false,
+    allowNull: true,
   })
   declare raridade: string; // ex: Comum, Incomum, Rara, Ultra Rara
+
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: true,
+  })
+  declare pontos_saude: number;
 
   @ForeignKey(() => CategoriaCartas)
   @Column({
@@ -48,61 +54,73 @@ export class Carta extends Model {
 
   @Column({
     type: DataType.TEXT,
+    allowNull: true,
   })
   descricaoPokedex: string;
 
   @Column({
     type: DataType.INTEGER,
+    allowNull: true,
   })
   danoCausado: number;
 
   @Column({
     type: DataType.STRING,
+    allowNull: true,
   })
   ataque: string;
 
   @Column({
     type: DataType.STRING,
+    allowNull: true,
   })
   custoAtaque: string;
 
   @Column({
     type: DataType.TEXT,
+    allowNull: true,
   })
   efeitosAtaque: string;
 
   @Column({
     type: DataType.STRING,
+    allowNull: true,
   })
   ilustrador: string;
 
   @Column({
     type: DataType.STRING,
+    allowNull: true,
   })
   simboloExpansao: string;
 
   @Column({
     type: DataType.STRING,
+    allowNull: true,
   })
   numeroExpansao: string;
 
   @Column({
     type: DataType.STRING,
+    allowNull: true,
   })
   fraqueza: string;
 
   @Column({
     type: DataType.STRING,
+    allowNull: true,
   })
   resistencia: string;
 
   @Column({
     type: DataType.STRING,
+    allowNull: true,
   })
   custoRecuo: string;
 
   @Column({
     type: DataType.TEXT,
+    allowNull: true,
   })
   descricaoNaPokedex: string;
 

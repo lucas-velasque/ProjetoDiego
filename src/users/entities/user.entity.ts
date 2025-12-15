@@ -44,15 +44,22 @@ export class User extends Model {
 
   @Column({
     type: DataType.STRING(255),
-    allowNull: false,
+    allowNull: true,
   })
   declare senha: string;
+
+  @Column({
+    type: DataType.STRING(255),
+    allowNull: true,
+    unique: true,
+  })
+  declare clerk_id: string;
 
   @ForeignKey(() => NivelUsuario)
   @Column({
     type: DataType.INTEGER,
     allowNull: true,
-    defaultValue: 1,
+    defaultValue: null,
   })
   declare nivel_usuario_id: number;
 
