@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Delete, Body, Param } from '@nestjs/common';
 import { PropostasService } from './propostas.service';
 import { CreatePropostaDto } from './dto/createProposta.dto';
 import { UpdatePropostaDto } from './dto/updateProposta.dto';
@@ -53,6 +53,43 @@ export class PropostasController {
   }
 
   @Public()
+  @Patch('propostas/:id/aceitar')
+  @ApiOperation({ summary: 'Aceitar uma proposta' })
+  @ApiParam({ name: 'id', description: 'ID da proposta', example: 1 })
+  @ApiResponse({ status: 200, description: 'Proposta aceita com sucesso' })
+  @ApiResponse({ status: 404, description: 'Proposta não encontrada' })
+  @ApiResponse({ status: 400, description: 'Proposta não pode ser aceita' })
+  aceitar(@Param('id') id: string) {
+    return this.service.aceitar(+id);
+  }
+
+  @Public()
+  @Patch('propostas/:id/recusar')
+  @ApiOperation({ summary: 'Recusar uma proposta' })
+  @ApiParam({ name: 'id', description: 'ID da proposta', example: 1 })
+  @ApiResponse({ status: 200, description: 'Proposta recusada com sucesso' })
+  @ApiResponse({ status: 404, description: 'Proposta não encontrada' })
+  @ApiResponse({ status: 400, description: 'Proposta não pode ser recusada' })
+  recusar(@Param('id') id: string) {
+    return this.service.recusar(+id);
+  }
+
+  @Public()
+  @Get('propostas/anuncio/:anuncioId')
+  @ApiOperation({ summary: 'Listar propostas de um anúncio (rota simplificada)' })
+  @ApiParam({ name: 'anuncioId', description: 'ID do anúncio', example: 1 })
+  @ApiQuery({ name: 'valor_min', required: false, type: Number, description: 'Valor mínimo da proposta' })
+  @ApiQuery({ name: 'valor_max', required: false, type: Number, description: 'Valor máximo da proposta' })
+  @ApiQuery({ name: 'status', required: false, enum: ['pendente', 'aceita', 'recusada', 'cancelada'], description: 'Status da proposta' })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Número da página', example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Limite de itens por página', example: 10 })
+  @ApiResponse({ status: 200, description: 'Lista de propostas retornada com sucesso' })
+  listarPorAnuncioSimplificado(@Param('anuncioId') anuncioId: string, @Query() filtros: FiltroPropostaDto) {
+    // Assume tipo 'venda' por padrão (você pode adicionar lógica para detectar o tipo se necessário)
+    return this.service.listarPorAnuncio('venda', +anuncioId, filtros);
+  }
+
+  @Public()
   @Get('propostas/:id')
   @ApiOperation({ summary: 'Buscar proposta por ID' })
   @ApiParam({ name: 'id', description: 'ID da proposta', example: 1 })
@@ -63,7 +100,7 @@ export class PropostasController {
   }
 
   @Public()
-  @Put('propostas/:id')
+  @Patch('propostas/:id')
   @ApiOperation({ summary: 'Atualizar uma proposta' })
   @ApiParam({ name: 'id', description: 'ID da proposta', example: 1 })
   @ApiBody({ type: UpdatePropostaDto })
@@ -81,16 +118,5 @@ export class PropostasController {
   @ApiResponse({ status: 404, description: 'Proposta não encontrada' })
   deletar(@Param('id') id: string) {
     return this.service.deletar(+id);
-  }
-
-  @Public()
-  @Put('propostas/:id/aceitar')
-  @ApiOperation({ summary: 'Aceitar uma proposta' })
-  @ApiParam({ name: 'id', description: 'ID da proposta', example: 1 })
-  @ApiResponse({ status: 200, description: 'Proposta aceita com sucesso' })
-  @ApiResponse({ status: 404, description: 'Proposta não encontrada' })
-  @ApiResponse({ status: 400, description: 'Proposta não pode ser aceita' })
-  aceitar(@Param('id') id: string) {
-    return this.service.aceitar(+id);
   }
 }

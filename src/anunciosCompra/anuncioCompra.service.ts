@@ -96,6 +96,15 @@ async listarTodos(filtros: FiltroAnuncioCompraDto) {
   };
 }
 
+  async listarPorUsuario(usuarioId: number) {
+    return this.anuncioCompraModel.findAll({
+      where: {
+        usuario_id: usuarioId,
+      },
+      order: [['created_at', 'DESC']],
+    });
+  }
+
   async buscarPorId(id: number) {
     const anuncio = await this.anuncioCompraModel.findByPk(id);
 
