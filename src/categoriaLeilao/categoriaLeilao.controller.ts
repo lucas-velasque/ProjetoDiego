@@ -10,6 +10,7 @@ import {
   Query,
   NotFoundException,
   BadRequestException,
+  UseGuards,
 } from "@nestjs/common";
 import { CategoriaLeilaoService } from "./categoriaLeilao.service";
 import { criarCategoriaLeilaoDto } from "./dto/criarCategoriaLeilao";
@@ -185,7 +186,7 @@ export class CategoriaLeilaoController {
     },
   })
   async buscarUm(@Param("id", ParseIntPipe) id: number) {
-    const categoria = await this.servico.buscar_um(id);
+    const categoria = await this.servico.buscarUm(id);
     if (!categoria) {
       throw new NotFoundException("Categoria de leilão não encontrada.");
     }
