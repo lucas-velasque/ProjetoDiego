@@ -10,14 +10,13 @@ import {
   Query,
   NotFoundException,
   BadRequestException,
-  UseGuards,
 } from "@nestjs/common";
 import { CategoriaLeilaoService } from "./categoriaLeilao.service";
 import { criarCategoriaLeilaoDto } from "./dto/criarCategoriaLeilao";
 import { atualizarCategoriaLeilaoDto } from "./dto/atualizarCategoriaLeilao";
 import { RolesGuard } from "./../common/guards/roles.guard";
 import { Roles } from "./../common/decorators/roles.decorator";
-import { Role } from "./../common/roles.enum";
+import { Role } from "../common/roles.enum";
 import {
   ApiTags,
   ApiOperation,
@@ -88,19 +87,13 @@ export class CategoriaLeilaoController {
   @ApiOperation({
     summary: "Listar categorias de leilão",
     description:
-      "Retorna uma lista paginada de categorias de leilão com opção de filtro por nome e tipo",
+      "Retorna uma lista paginada de categorias de leilão com opção de filtro por nome",
   })
   @ApiQuery({
     name: "nome",
     required: false,
     description: "Filtrar categorias por nome",
     example: "Raras",
-  })
-  @ApiQuery({
-    name: "tipo",
-    required: false,
-    description: "Filtrar categorias por tipo",
-    example: "RARA",
   })
   @ApiQuery({
     name: "page",
@@ -139,13 +132,11 @@ export class CategoriaLeilaoController {
   })
   async listar(
     @Query("nome") nome?: string,
-    @Query("tipo") tipo?: string,
     @Query("page") page?: string,
     @Query("limit") limit?: string
   ) {
     const filtros = {
       nome,
-      tipo,
       page: page ? parseInt(page, 10) : undefined,
       limit: limit ? parseInt(limit, 10) : undefined,
     };
@@ -194,7 +185,7 @@ export class CategoriaLeilaoController {
     },
   })
   async buscarUm(@Param("id", ParseIntPipe) id: number) {
-    const categoria = await this.servico.buscarUm(id);
+    const categoria = await this.servico.buscar_um(id);
     if (!categoria) {
       throw new NotFoundException("Categoria de leilão não encontrada.");
     }
@@ -205,7 +196,7 @@ export class CategoriaLeilaoController {
   }
 
   @Put(":id")
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.User)
   @ApiOperation({
     summary: "Atualizar categoria de leilão",
     description: "Atualiza os dados de uma categoria de leilão existente",

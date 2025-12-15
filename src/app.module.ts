@@ -16,6 +16,8 @@ import { NivelUsuarioModule } from "./nivelUsuario/nivelUsuario.module";
 import { ConfigModule } from "@nestjs/config";
 import { LeiloesModule } from "./leiloes/leiloes.module";
 import { CarrinhoModule } from "./carrinho/carrinho.module";
+import { DatabaseMigrationService } from "./database/database-migration.service";
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -34,6 +36,6 @@ import { CarrinhoModule } from "./carrinho/carrinho.module";
     CarrinhoModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, DatabaseMigrationService],
 })
 export class AppModule {}

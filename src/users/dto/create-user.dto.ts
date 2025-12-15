@@ -14,9 +14,13 @@ export class CreateUserDto {
   email: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @MinLength(6, { message: 'Senha deve ter no mínimo 6 caracteres' })
-  senha: string;
+  senha?: string;
+
+  @IsOptional()
+  @IsString()
+  clerk_id?: string;
 
   @IsOptional()
   @IsString()
@@ -25,5 +29,9 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsInt()
-  nivel_usuario_id?: number;
+  nivel_usuario_id?: number | null;
+
+  @IsOptional()
+  @IsString()
+  status?: string;
 }

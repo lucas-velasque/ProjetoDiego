@@ -17,8 +17,7 @@ import { criarNivelUsuarioDto } from "./dto/criarNivelUsuario";
 import { AtualizarNivelUsuarioDto } from "./dto/atualizarNivelUsuario";
 import { RolesGuard } from "./../common/guards/roles.guard";
 import { Roles } from "./../common/decorators/roles.decorator";
-import { Role } from "./../common/roles.enum";
-import { Public } from "./../common/decorators/public.decorator";
+import { Role } from "../common/roles.enum";
 import {
   ApiBody,
   ApiOperation,
@@ -101,7 +100,7 @@ export class NivelUsuarioController {
   }
 
   @Get(":id")
-  @Public()
+  @Roles(Role.Admin, Role.User)
   @ApiOperation({ summary: "Buscar um nivel de usuario por ID" })
   @ApiResponse({
     status: 200,

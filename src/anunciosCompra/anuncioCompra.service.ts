@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { AnuncioCompra } from './entities/anuncioCompra.entity';
 import { CreateAnuncioCompraDto } from './dto/createAnuncioCompra.dto';
@@ -106,8 +106,13 @@ async listarTodos(filtros: FiltroAnuncioCompraDto) {
     return anuncio;
   }
 
-  async atualizar(id: number, dto: UpdateAnuncioCompraDto) {
+  async atualizar(id: number, dto: UpdateAnuncioCompraDto, usuarioId: number) {
     const anuncio = await this.buscarPorId(id);
+
+    // Validar propriedade do anúncio
+    if (anuncio.usuario_id !== usuarioId) {
+      throw new ForbiddenException('Você não tem permissão para editar este anúncio');
+    }
 
     await anuncio.update({
       nome_carta: dto.nome_carta,
@@ -124,8 +129,14 @@ async listarTodos(filtros: FiltroAnuncioCompraDto) {
     return this.buscarPorId(id);
   }
 
-  async deletar(id: number) {
+  async deletar(id: number, usuarioId: number) {
     const anuncio = await this.buscarPorId(id);
+
+    // Validar propriedade do anúncio
+    if (anuncio.usuario_id !== usuarioId) {
+      throw new ForbiddenException('Você não tem permissão para deletar este anúncio');
+    }
+
     await anuncio.update({ status: 'cancelado' });
     return { message: 'Anúncio de compra cancelado com sucesso' };
   }

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { AnuncioVenda } from './entities/anuncioVenda.entity';
 import { AnuncioVendaCarta } from './entities/anuncioVendaCarta.entity';
@@ -147,7 +147,18 @@ async listarTodos(filtros: FiltroAnuncioVendaDto) {
 
   async buscarPorId(id: number) {
     const anuncio = await this.anuncioVendaModel.findByPk(id, {
-      include: [AnuncioVendaCarta],
+      include: [
+        {
+          model: AnuncioVendaCarta,
+          as: 'cartas',
+          include: [
+            {
+              model: Carta,
+              as: 'carta',
+            },
+          ],
+        },
+      ],
     });
 
     if (!anuncio) {
@@ -157,8 +168,13 @@ async listarTodos(filtros: FiltroAnuncioVendaDto) {
     return anuncio;
   }
 
-  async atualizar(id: number, dto: UpdateAnuncioVendaDto) {
+  async atualizar(id: number, dto: UpdateAnuncioVendaDto, usuarioId: number) {
     const anuncio = await this.buscarPorId(id);
+
+    // Validar propriedade do anúncio
+    if (anuncio.usuario_id !== usuarioId) {
+      throw new ForbiddenException('Você não tem permissão para editar este anúncio');
+    }
 
     await anuncio.update({
       titulo: dto.titulo,
@@ -170,8 +186,14 @@ async listarTodos(filtros: FiltroAnuncioVendaDto) {
     return this.buscarPorId(id);
   }
 
-  async deletar(id: number) {
+  async deletar(id: number, usuarioId: number) {
     const anuncio = await this.buscarPorId(id);
+
+    // Validar propriedade do anúncio
+    if (anuncio.usuario_id !== usuarioId) {
+      throw new ForbiddenException('Você não tem permissão para deletar este anúncio');
+    }
+
     await anuncio.update({ status: 'cancelado' });
     return { message: 'Anúncio cancelado com sucesso' };
   }
