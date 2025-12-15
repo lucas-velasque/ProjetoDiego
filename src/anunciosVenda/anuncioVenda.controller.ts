@@ -23,6 +23,15 @@ export class AnunciosVendaController {
     return this.service.criar(dto, usuarioId);
   }
 
+  @Get('meus-anuncios')
+  @ApiOperation({ summary: 'Listar anúncios de venda do usuário logado' })
+  @ApiResponse({ status: 200, description: 'Lista de anúncios do usuário retornada com sucesso' })
+  @ApiResponse({ status: 401, description: 'Não autorizado' })
+  listarMeusAnuncios(@UsuarioAtual() usuario) {
+    const usuarioId = usuario.sub;
+    return this.service.listarPorUsuario(usuarioId);
+  }
+
   @Public()
   @Get()
   @ApiOperation({ summary: 'Listar todos os anúncios de venda com filtros' })

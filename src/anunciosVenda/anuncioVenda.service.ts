@@ -145,6 +145,27 @@ async listarTodos(filtros: FiltroAnuncioVendaDto) {
   };
 }
 
+  async listarPorUsuario(usuarioId: number) {
+    return this.anuncioVendaModel.findAll({
+      where: {
+        usuario_id: usuarioId,
+      },
+      include: [
+        {
+          model: AnuncioVendaCarta,
+          as: 'cartas',
+          include: [
+            {
+              model: Carta,
+              as: 'carta',
+            },
+          ],
+        },
+      ],
+      order: [['created_at', 'DESC']],
+    });
+  }
+
   async buscarPorId(id: number) {
     const anuncio = await this.anuncioVendaModel.findByPk(id, {
       include: [
