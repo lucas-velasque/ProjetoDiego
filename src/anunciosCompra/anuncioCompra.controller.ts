@@ -40,11 +40,29 @@ export class AnunciosCompraController {
     return this.service.criar(dto, usuarioId);
   }
 
+  @Get('meus-anuncios')
+  @ApiOperation({
+    summary: 'Listar anúncios de compra do usuário logado',
+    description: 'Retorna apenas os anúncios de compra criados pelo usuário autenticado'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de anúncios do usuário retornada com sucesso'
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado'
+  })
+  listarMeusAnuncios(@UsuarioAtual() usuario) {
+    const usuarioId = usuario.sub;
+    return this.service.listarPorUsuario(usuarioId);
+  }
+
   @Public()
   @Get()
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Listar anúncios de compra',
-    description: 'Retorna uma lista de anúncios de compra com possibilidade de filtros' 
+    description: 'Retorna uma lista de anúncios de compra com possibilidade de filtros'
   })
   @ApiQuery({
     name: 'filtros',
