@@ -2,33 +2,33 @@ import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
-import { UploadService } from "./upload/upload.service";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    // Habilitar raw body para webhook do Stripe
+    rawBody: true,
+  });
+
   app.useGlobalPipes(new ValidationPipe());
 
   // ✅ CORS (DEV): permite qualquer origin (inclui 192.168.1.62:3001)
   app.enableCors({
     origin: true, // reflete o Origin automaticamente
     methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "stripe-signature"],
     credentials: true,
   });
 
-  // Inicializar bucket do Supabase Storage (apenas se as credenciais estiverem configuradas)
-  try {
-    const uploadService = app.get(UploadService);
-    await uploadService.ensureBucketExists();
-    console.log('✅ Supabase Storage bucket verificado/criado');
-  } catch (error) {
-    console.warn('⚠️ Supabase Storage não configurado. Upload de imagens estará indisponível.');
-  }
-
   const config = new DocumentBuilder()
     .setTitle("API de Loja de Cartas Pokémon")
-    .setDescription("API para gerenciamento ...")
+    .setDescription("API para gerenciamento de cartas Pokémon, leilões, anúncios e pagamentos")
     .setVersion("1.0")
+    .addBearerAuth()
+    .addTag("cartas")
+    .addTag("anuncios-venda")
+    .addTag("carrinho")
+    .addTag("pagamento")
+    .addTag("leiloes")
     .addTag("comentarios")
     .build();
 

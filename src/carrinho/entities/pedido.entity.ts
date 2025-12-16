@@ -40,6 +40,20 @@ export class Pedido extends Model {
   })
   declare status: string;
 
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+    field: 'stripe_session_id',
+  })
+  declare stripe_session_id: string;
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+    field: 'stripe_payment_intent_id',
+  })
+  declare stripe_payment_intent_id: string;
+
   @CreatedAt
   declare created_at: Date;
 

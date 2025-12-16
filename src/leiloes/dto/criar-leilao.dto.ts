@@ -18,9 +18,10 @@ export class CriarLeilaoDto {
   @IsString()
   descricao?: string;
 
-  @ApiProperty({ example: "aberto" })
+  @ApiProperty({ example: "aberto", required: false })
+  @IsOptional()
   @IsString()
-  status!: string;
+  status?: string;
 
   @ApiProperty({ example: 100 })
   @Type(() => Number)
@@ -28,11 +29,12 @@ export class CriarLeilaoDto {
   @Min(0)
   precoInicial!: number;
 
-  @ApiProperty({ example: 100 })
+  @ApiProperty({ example: 100, required: false, description: "Se não informado, será igual ao precoInicial" })
+  @IsOptional()
   @Type(() => Number)
   @IsNumber()
   @Min(0)
-  precoAtual!: number;
+  precoAtual?: number;
 
   @ApiProperty({ example: 5 })
   @Type(() => Number)

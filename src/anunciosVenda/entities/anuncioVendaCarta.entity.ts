@@ -58,12 +58,6 @@ export class AnuncioVendaCarta extends Model {
   })
   declare observacoes: string;
 
-  @Column({
-    type: DataType.TEXT,
-    allowNull: true,
-  })
-  declare foto_url: string;
-
   @CreatedAt
   declare created_at: Date;
 

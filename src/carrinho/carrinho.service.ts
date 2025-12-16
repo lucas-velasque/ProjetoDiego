@@ -7,9 +7,12 @@ import { AnuncioVenda } from '../anunciosVenda/entities/anuncioVenda.entity';
 import { AdicionarCarrinhoDto } from './dto/adicionarCarrinho.dto';
 import { FiltroPedidoDto } from './dto/filtroPedido.dto';
 import { Op } from 'sequelize';
+import Stripe from 'stripe';
 
 @Injectable()
 export class CarrinhoService {
+  private stripe: Stripe;
+
   constructor(
     @InjectModel(CarrinhoItem)
     private carrinhoItemModel: typeof CarrinhoItem,
@@ -22,7 +25,15 @@ export class CarrinhoService {
 
     @InjectModel(AnuncioVenda)
     private anuncioVendaModel: typeof AnuncioVenda,
-  ) {}
+  ) {
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+    
+    if (stripeSecretKey && !stripeSecretKey.includes('SUBSTITUA')) {
+      this.stripe = new Stripe(stripeSecretKey, {
+        apiVersion: '2023-10-16' as any,
+      });
+    }
+  }
 
   // 1. ADICIONAR AO CARRINHO
   async adicionarAoCarrinho(dto: AdicionarCarrinhoDto, usuarioId: number) {
@@ -99,18 +110,14 @@ export class CarrinhoService {
         {
           model: AnuncioVenda,
           as: 'anuncio',
-          required: false,
         },
       ],
       order: [['created_at', 'DESC']],
     });
 
-    // Calcular total (com proteção contra anúncios deletados)
+    // Calcular total
     const valorTotal = itens.reduce((total, item) => {
-      if (item.anuncio && item.anuncio.preco_total) {
-        return total + item.quantidade * Number(item.anuncio.preco_total);
-      }
-      return total;
+      return total + item.quantidade * Number(item.anuncio.preco_total);
     }, 0);
 
     return {
@@ -122,7 +129,7 @@ export class CarrinhoService {
     };
   }
 
-  // 4. CHECKOUT (FINALIZAR COMPRA)
+  // 4. CHECKOUT (FINALIZAR COMPRA) - Agora com integração Stripe
   async checkout(usuarioId: number) {
     // Buscar itens do carrinho
     const itens = await this.carrinhoItemModel.findAll({
@@ -189,7 +196,66 @@ export class CarrinhoService {
       where: { usuario_id: usuarioId },
     });
 
-    // Retornar pedido com itens
+    // Se Stripe estiver configurado, criar sessão de checkout
+    if (this.stripe) {
+      try {
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+        
+        const lineItems = itens.map((item) => ({
+          price_data: {
+            currency: 'brl',
+            product_data: {
+              name: item.anuncio.titulo,
+              description: item.anuncio.descricao || 'Carta Pokémon',
+            },
+            unit_amount: Math.round(Number(item.anuncio.preco_total) * 100),
+          },
+          quantity: item.quantidade,
+        }));
+
+        const session = await this.stripe.checkout.sessions.create({
+          payment_method_types: ['card'],
+          line_items: lineItems,
+          mode: 'payment',
+          success_url: `${frontendUrl}/pedidos/${pedido.id}?success=true`,
+          cancel_url: `${frontendUrl}/cart?canceled=true`,
+          metadata: {
+            pedidoId: pedido.id.toString(),
+            usuarioId: usuarioId.toString(),
+          },
+        });
+
+        // Atualizar pedido com ID da sessão
+        await pedido.update({ stripe_session_id: session.id });
+
+        // Retornar pedido com URL do Stripe
+        const pedidoCompleto = await this.pedidoModel.findByPk(pedido.id, {
+          include: [
+            {
+              model: PedidoItem,
+              as: 'itens',
+              include: [
+                {
+                  model: AnuncioVenda,
+                  as: 'anuncio',
+                },
+              ],
+            },
+          ],
+        });
+
+        return {
+          pedido: pedidoCompleto,
+          checkout_url: session.url,
+          session_id: session.id,
+        };
+      } catch (error) {
+        console.error('Erro ao criar sessão Stripe:', error);
+        // Continuar sem Stripe se houver erro
+      }
+    }
+
+    // Retornar pedido sem Stripe
     return this.pedidoModel.findByPk(pedido.id, {
       include: [
         {

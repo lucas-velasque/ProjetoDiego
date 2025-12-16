@@ -17,53 +17,52 @@ import { CategoriaLeilao } from "src/categoriaLeilao/categoriaLeilao.model";
 @Table({ tableName: "leiloes", timestamps: true })
 export class Leilao extends Model<Leilao> {
   @PrimaryKey
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
   @Default(() => uuid())
   @Column(DataType.UUID)
   declare id: string;
 
   @Column(DataType.STRING)
-  status!: string;
+  declare status: string;
 
   @Column(DataType.STRING)
-  titulo!: string;
+  declare titulo: string;
 
   @Column(DataType.TEXT)
-  descricao?: string;
+  declare descricao: string;
 
   @Column(DataType.DECIMAL(12, 2))
-  precoInicial!: number;
+  declare precoInicial: number;
 
   @Column(DataType.DECIMAL(12, 2))
-  precoAtual!: number;
+  declare precoAtual: number;
 
   @Column(DataType.DECIMAL(12, 2))
-  valor_incremento!: number;
+  declare valor_incremento: number;
 
   @Column(DataType.DATE)
-  terminaEm!: Date;
+  declare terminaEm: Date;
 
-  @Column({ type: DataType.BOOLEAN, defaultValue: true })
-  ativo!: boolean;
+  @Default(true)
+  @Column(DataType.BOOLEAN)
+  declare ativo: boolean;
 
   @ForeignKey(() => User)
   @Column(DataType.INTEGER)
-  vendedorId!: number;
+  declare vendedorId: number;
 
   @BelongsTo(() => User)
-  vendedor!: User;
+  declare vendedor: User;
 
   @ForeignKey(() => CategoriaLeilao)
   @Column(DataType.INTEGER)
-  categoriaLeilaoId?: number;
+  declare categoriaLeilaoId: number;
 
   @BelongsTo(() => CategoriaLeilao)
-  categoria!: CategoriaLeilao;
+  declare categoria: CategoriaLeilao;
 
   @HasMany(() => Lance)
-  lances!: Lance[];
+  declare lances: Lance[];
 
   @Column(DataType.INTEGER)
-  ganhadorId?: number;
-  id_usuario: number;
+  declare ganhadorId: number;
 }

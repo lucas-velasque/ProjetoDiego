@@ -16,9 +16,8 @@ import { NivelUsuarioModule } from "./nivelUsuario/nivelUsuario.module";
 import { ConfigModule } from "@nestjs/config";
 import { LeiloesModule } from "./leiloes/leiloes.module";
 import { CarrinhoModule } from "./carrinho/carrinho.module";
+import { PagamentoModule } from "./pagamento/pagamento.module";
 import { DatabaseMigrationService } from "./database/database-migration.service";
-import { AddFotoUrlMigration } from "./database/migrations/add-foto-url.migration";
-import { UploadModule } from "./upload/upload.module";
 
 @Module({
   imports: [
@@ -36,9 +35,9 @@ import { UploadModule } from "./upload/upload.module";
     NivelUsuarioModule,
     LeiloesModule,
     CarrinhoModule,
-    UploadModule,
+    PagamentoModule,
   ],
   controllers: [AppController],
-  providers: [AppService, DatabaseMigrationService, AddFotoUrlMigration],
+  providers: [AppService, DatabaseMigrationService],
 })
 export class AppModule {}

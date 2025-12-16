@@ -134,17 +134,6 @@ async listarPorAnuncio(tipo: string, anuncioId: number, filtros: FiltroPropostaD
     return this.buscarPorId(id);
   }
 
-  async recusar(id: number) {
-    const proposta = await this.buscarPorId(id);
-
-    if (proposta.status !== 'pendente') {
-      throw new BadRequestException('Só é possível recusar propostas pendentes');
-    }
-
-    await proposta.update({ status: 'recusada' });
-    return this.buscarPorId(id);
-  }
-
   private async buscarAnuncio(tipo: string, id: number) {
     if (tipo === 'venda') {
       return this.anuncioVendaModel.findByPk(id);
