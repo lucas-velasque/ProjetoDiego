@@ -1,7 +1,6 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
-import { User } from '../users/user.model';
-import { JwtService } from '@nestjs/jwt';
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { UsersService } from "../users/users.service";
+import { JwtService } from "@nestjs/jwt";
 
 @Injectable()
 export class AuthService {
@@ -18,12 +17,12 @@ export class AuthService {
     const user = await this.usersService.findOneByUsername(username);
 
     if (!user) {
-      throw new UnauthorizedException('Credenciais inválidas');
+      throw new UnauthorizedException("Credenciais inválidas");
     }
 
     // Verificar se usuário está ativo
-    if (user.status !== 'ativo') {
-      throw new UnauthorizedException('Usuário inativo ou bloqueado');
+    if (user.status !== "ativo") {
+      throw new UnauthorizedException("Usuário inativo ou bloqueado");
     }
 
     // Validar senha usando bcrypt
@@ -33,7 +32,7 @@ export class AuthService {
     );
 
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Credenciais inválidas');
+      throw new UnauthorizedException("Credenciais inválidas");
     }
 
     // Criar payload do JWT

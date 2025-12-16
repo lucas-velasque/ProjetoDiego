@@ -69,7 +69,7 @@ web_modules/
 .env
 .env.*
 !.env.example
-
+!.env.example.docker
 # Supabase
 .supabase/
 supabase/.env

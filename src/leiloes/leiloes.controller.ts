@@ -1,4 +1,3 @@
-//aaaaaa
 import {
   Controller,
   Get,
@@ -18,12 +17,17 @@ import { CriarLeilaoDto } from "./dto/criar-leilao.dto";
 import { AtualizarLeilaoDto } from "./dto/atualizar-leilao.dto";
 import { CriarLanceDto } from "./dto/criar-lance.dto";
 import { ListarLeiloesDto } from "./dto/listar-leiloes.dto";
+import { Public } from "../common/decorators/public.decorator";
+import { ApiTags, ApiOperation } from "@nestjs/swagger";
 
+@ApiTags("Leiloes")
 @Controller("leiloes")
 export class LeiloesController {
   constructor(private readonly service: LeiloesService) {}
 
+  @Public()
   @Post()
+  @ApiOperation({ summary: "Criar um novo leilão" })
   async criar(@Body() dto: CriarLeilaoDto) {
     try {
       const data = await this.service.criar(dto);
@@ -34,7 +38,9 @@ export class LeiloesController {
     }
   }
 
+  @Public()
   @Get()
+  @ApiOperation({ summary: "Listar todos os leilões" })
   async listar(@Query() query: ListarLeiloesDto) {
     try {
       const { data, total, page, lastPage } = await this.service.listar(query);
@@ -48,7 +54,9 @@ export class LeiloesController {
     }
   }
 
+  @Public()
   @Get(":id")
+  @ApiOperation({ summary: "Buscar leilão por ID" })
   async visualizar(@Param("id") id: string) {
     try {
       const data = await this.service.visualizar(id);
@@ -62,7 +70,9 @@ export class LeiloesController {
     }
   }
 
+  @Public()
   @Patch(":id")
+  @ApiOperation({ summary: "Atualizar um leilão" })
   async atualizar(@Param("id") id: string, @Body() dto: AtualizarLeilaoDto) {
     try {
       const result = await this.service.atualizar(id, dto);
@@ -85,7 +95,9 @@ export class LeiloesController {
     }
   }
 
+  @Public()
   @Delete(":id")
+  @ApiOperation({ summary: "Deletar um leilão" })
   async deletar(@Param("id") id: string) {
     try {
       const deleted = await this.service.deletar(id);
@@ -100,7 +112,9 @@ export class LeiloesController {
   }
 
   // Dar lance
+  @Public()
   @Post(":id/lances")
+  @ApiOperation({ summary: "Dar um lance em um leilão" })
   async darLance(@Param("id") leilaoId: string, @Body() dto: CriarLanceDto) {
     try {
       if (dto.id_usuario == null || dto.valor == null) {
@@ -122,7 +136,9 @@ export class LeiloesController {
   }
 
   // Encerrar leilão manualmente
+  @Public()
   @Patch(":id/encerrar")
+  @ApiOperation({ summary: "Encerrar um leilão manualmente" })
   async encerrar(@Param("id") id: string) {
     try {
       const data = await this.service.encerrarManual(id);
@@ -134,7 +150,9 @@ export class LeiloesController {
   }
 
   // Leilões vencidos por mim (público: passar usuarioId na query)
+  @Public()
   @Get("me/vencidos")
+  @ApiOperation({ summary: "Listar leilões vencidos pelo usuário" })
   async vencidosPorMim(@Query("usuarioId", ParseIntPipe) usuarioId: number) {
     try {
       const data = await this.service.leiloesVencidosPor(usuarioId);
@@ -147,7 +165,9 @@ export class LeiloesController {
   }
 
   // Meus leilões ativos (público: passar usuarioId na query)
+  @Public()
   @Get("me/ativos")
+  @ApiOperation({ summary: "Listar leilões ativos do usuário" })
   async meusAtivos(@Query("usuarioId", ParseIntPipe) usuarioId: number) {
     try {
       const data = await this.service.meusLeiloesAtivos(usuarioId);

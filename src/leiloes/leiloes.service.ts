@@ -23,7 +23,6 @@ export class LeiloesService {
   ) {}
 
   async criar(dto: CriarLeilaoDto) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const payload: Partial<Leilao> = {
       ...(dto as any),
     };
@@ -35,11 +34,14 @@ export class LeiloesService {
 
     // ativo default true, se o model não já tiver default
     if (payload.ativo == null) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       payload.ativo = true as any;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    // status default aberto
+    if (!payload.status) {
+      payload.status = "aberto";
+    }
+
     const leilao = await this.leiloes.create(payload as any);
     return leilao;
   }
@@ -125,7 +127,6 @@ export class LeiloesService {
       throw new BadRequestException(`Lance mínimo: ${minimo.toFixed(2)}`);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     await this.lances.create({
       id_leilao: id_leilao.toString(),
       id_usuario,
@@ -151,13 +152,19 @@ export class LeiloesService {
       order: [["valor", "DESC"]],
     });
 
-    const updatePayload: Partial<Leilao> = {
+    // Calcular preço atual corretamente
+    let precoFinal: number;
+    if (maiorLance) {
+      precoFinal = parseFloat(String(maiorLance.valor));
+    } else {
+      precoFinal = parseFloat(String(leilao.precoAtual)) || parseFloat(String(leilao.precoInicial)) || 0;
+    }
+
+    const updatePayload: any = {
       status: "encerrado",
       ativo: false,
       terminaEm: new Date(),
-      precoAtual: maiorLance
-        ? Number(maiorLance.valor)
-        : (leilao.precoAtual ?? 0),
+      precoAtual: precoFinal,
     };
 
     if (maiorLance) {
@@ -165,6 +172,9 @@ export class LeiloesService {
     }
 
     await leilao.update(updatePayload);
+    
+    // Recarregar o leilão para retornar dados atualizados
+    await leilao.reload();
     return leilao;
   }
 

@@ -20,9 +20,11 @@ async function bootstrap() {
   try {
     const uploadService = app.get(UploadService);
     await uploadService.ensureBucketExists();
-    console.log('✅ Supabase Storage bucket verificado/criado');
+    console.log("✅ Supabase Storage bucket verificado/criado");
   } catch (error) {
-    console.warn('⚠️ Supabase Storage não configurado. Upload de imagens estará indisponível.');
+    console.warn(
+      "Supabase Storage não configurado. Upload de imagens estará indisponível.",
+    );
   }
 
   const config = new DocumentBuilder()

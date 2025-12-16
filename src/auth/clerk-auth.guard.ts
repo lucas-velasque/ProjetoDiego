@@ -3,12 +3,12 @@ import {
   ExecutionContext,
   Injectable,
   UnauthorizedException,
-} from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { Request } from 'express';
-import { verifyToken } from '@clerk/backend';
-import { IS_PUBLIC_KEY } from '../common/decorators/public.decorator';
-import { UsersService } from '../users/users.service';
+} from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
+import { Request } from "express";
+import { verifyToken } from "@clerk/backend";
+import { IS_PUBLIC_KEY } from "../common/decorators/public.decorator";
+import { UsersService } from "../users/users.service";
 
 @Injectable()
 export class ClerkAuthGuard implements CanActivate {
@@ -32,7 +32,7 @@ export class ClerkAuthGuard implements CanActivate {
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
-      throw new UnauthorizedException('Token não fornecido');
+      throw new UnauthorizedException("Token não fornecido");
     }
 
     try {
@@ -40,8 +40,10 @@ export class ClerkAuthGuard implements CanActivate {
       const clerkSecretKey = process.env.CLERK_SECRET_KEY;
 
       if (!clerkSecretKey) {
-        console.error('CLERK_SECRET_KEY não configurada no ambiente');
-        throw new UnauthorizedException('Configuração de autenticação inválida');
+        console.error("CLERK_SECRET_KEY não configurada no ambiente");
+        throw new UnauthorizedException(
+          "Configuração de autenticação inválida",
+        );
       }
 
       const payload = await verifyToken(token, {
@@ -52,7 +54,9 @@ export class ClerkAuthGuard implements CanActivate {
       const clerkId = payload.sub;
 
       if (!clerkId) {
-        throw new UnauthorizedException('Token inválido: clerkId não encontrado');
+        throw new UnauthorizedException(
+          "Token inválido: clerkId não encontrado",
+        );
       }
 
       // Buscar ou criar usuário no banco
@@ -60,30 +64,38 @@ export class ClerkAuthGuard implements CanActivate {
 
       if (!user) {
         // Usuário não existe no banco, criar automaticamente
-        console.log('Criando usuário automaticamente via ClerkAuthGuard:', clerkId);
+        console.log(
+          "Criando usuário automaticamente via ClerkAuthGuard:",
+          clerkId,
+        );
 
         // Extrair informações do token do Clerk
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const email = (payload as any).email || `${clerkId}@clerk.user`;
-        const firstName = (payload as any).first_name || '';
-        const lastName = (payload as any).last_name || '';
-        const nome = [firstName, lastName].filter(Boolean).join(' ') || 'Usuário';
-        const username = (payload as any).username || email.split('@')[0] || clerkId;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const firstName = (payload as any).first_name || "";
+        const lastName = (payload as any).last_name || "";
+        const nome =
+          [firstName, lastName].filter(Boolean).join(" ") || "Usuário";
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const username =
+          (payload as any).username || email.split("@")[0] || clerkId;
 
         user = await this.usersService.create({
           clerk_id: clerkId,
           email,
           nome,
           username,
-          senha: '', // Clerk gerencia senha
-          status: 'ativo',
+          senha: "", // Clerk gerencia senha
+          status: "ativo",
           nivel_usuario_id: null, // Não definir nível de usuário por enquanto
         });
 
-        console.log('Usuário criado com sucesso:', user.id);
+        console.log("Usuário criado com sucesso:", user.id);
       }
 
       // Adicionar informações do usuário no request
-      request['user'] = {
+      request["user"] = {
         sub: user.id, // ID do banco de dados
         clerkId: clerkId,
         username: user.username,
@@ -93,13 +105,13 @@ export class ClerkAuthGuard implements CanActivate {
 
       return true;
     } catch (error) {
-      console.error('Erro ao validar token do Clerk:', error.message);
-      throw new UnauthorizedException('Token inválido ou expirado');
+      console.error("Erro ao validar token do Clerk:", error.message);
+      throw new UnauthorizedException("Token inválido ou expirado");
     }
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
+    const [type, token] = request.headers.authorization?.split(" ") ?? [];
+    return type === "Bearer" ? token : undefined;
   }
 }
