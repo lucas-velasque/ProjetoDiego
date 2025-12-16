@@ -99,14 +99,18 @@ export class CarrinhoService {
         {
           model: AnuncioVenda,
           as: 'anuncio',
+          required: false,
         },
       ],
       order: [['created_at', 'DESC']],
     });
 
-    // Calcular total
+    // Calcular total (com proteção contra anúncios deletados)
     const valorTotal = itens.reduce((total, item) => {
-      return total + item.quantidade * Number(item.anuncio.preco_total);
+      if (item.anuncio && item.anuncio.preco_total) {
+        return total + item.quantidade * Number(item.anuncio.preco_total);
+      }
+      return total;
     }, 0);
 
     return {
