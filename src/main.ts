@@ -16,10 +16,14 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Inicializar bucket do Supabase Storage
-  const uploadService = app.get(UploadService);
-  await uploadService.ensureBucketExists();
-  console.log('✅ Supabase Storage bucket verificado/criado');
+  // Inicializar bucket do Supabase Storage (apenas se as credenciais estiverem configuradas)
+  try {
+    const uploadService = app.get(UploadService);
+    await uploadService.ensureBucketExists();
+    console.log('✅ Supabase Storage bucket verificado/criado');
+  } catch (error) {
+    console.warn('⚠️ Supabase Storage não configurado. Upload de imagens estará indisponível.');
+  }
 
   const config = new DocumentBuilder()
     .setTitle("API de Loja de Cartas Pokémon")

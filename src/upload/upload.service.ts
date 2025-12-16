@@ -6,16 +6,22 @@ import { ConfigService } from '@nestjs/config';
 export class UploadService {
   private supabase: SupabaseClient;
   private bucketName = 'anuncios-fotos';
+  private supabaseUrl: string | undefined;
+  private supabaseKey: string | undefined;
 
   constructor(private configService: ConfigService) {
-    const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
-    const supabaseKey = this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY');
+    this.supabaseUrl = this.configService.get<string>('SUPABASE_URL');
+    this.supabaseKey = this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY');
 
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error('Supabase credentials are not configured');
+    if (this.supabaseUrl && this.supabaseKey) {
+      this.supabase = createClient(this.supabaseUrl, this.supabaseKey);
     }
+  }
 
-    this.supabase = createClient(supabaseUrl, supabaseKey);
+  private ensureConfigured(): void {
+    if (!this.supabase) {
+      throw new Error('Supabase credentials are not configured. Please set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables.');
+    }
   }
 
   /**
@@ -30,6 +36,7 @@ export class UploadService {
     filename: string,
     folder?: string,
   ): Promise<string> {
+    this.ensureConfigured();
     try {
       // Gerar nome único para o arquivo
       const timestamp = Date.now();
@@ -65,6 +72,7 @@ export class UploadService {
    * @param filePath Caminho do arquivo no bucket
    */
   async deleteImage(filePath: string): Promise<void> {
+    this.ensureConfigured();
     try {
       const { error } = await this.supabase.storage
         .from(this.bucketName)
@@ -83,6 +91,7 @@ export class UploadService {
    * Verifica se o bucket existe, se não, cria
    */
   async ensureBucketExists(): Promise<void> {
+    this.ensureConfigured();
     try {
       const { data: buckets } = await this.supabase.storage.listBuckets();
       const bucketExists = buckets?.some((b) => b.name === this.bucketName);
